@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+#include "utils.h"
 #include "ConfigFile.h"
 #include "Server.h"
 #include "Digitizer.h"
@@ -21,9 +22,9 @@ public:
     void SetStatus(int status) {runparameters.run_status = status;}
     int GetStatus() {return runparameters.run_status;}
 
-    void SetCurrentTime();//
-
     Dconfig &GetDconfig() {return dconfig;}
+    Aconfig &GetAconfig() {return aconfig;}
+    RunParameters &GetRunParameters() {return runparameters;}
 private:
     
     Server *server;
