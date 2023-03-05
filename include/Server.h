@@ -23,6 +23,7 @@ private:
     THttpServer *serv;
     RunParameters runparameters;
 	DigiData digidata;
+    long StartTime;
     // RunManager *runmanager;
     const char *str; // text field about current parameters
 };

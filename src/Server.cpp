@@ -74,8 +74,9 @@ void cmdStart()
 {
     runmanager.SetStatus(2);
     
-    PrevRateTime = util::get_time();
-    StartTime=PrevRateTime;
+    StartTime = GetCurrentTime();
+
+    
     Nb=0;
     Ne=0;
     nCycles= 0;
@@ -99,12 +100,23 @@ void cmdStart()
 void cmdStop()
 {
     runmanager.SetStatus(1);
+
+    CAEN_DGTZ_SWStopAcquisition(handle);
+    onrun=kFALSE;
+    std::cout<<"cmdStop()"<<std::endl;
+    serv->SetItemField("/Status", "value","Stop");
+    serv->SetItemField("/Status", "value", "0");
+    if (readtemp!=0)
+    {
+        wget(temp1, "http://minitrs01.cern.ch", "/", 80);
+        serv->SetItemField("/Temperatures", "value", temp0+"\n"+temp1);
+    }
 }
 
 void ChangeParameter(int arg1, int arg2, const char *ch)
 {
-    if (strcmp("num_evs", ch) == 0) runmanager.GetConfig()->SetNevents(arg1);
-    if (strcmp("num_samps", ch) == 0) runmanager.GetConfig()->SetNsamples(arg1);
+    if (strcmp("num_evs", ch) == 0) runmanager.GetRunParameters().Nevents = arg1;
+    if (strcmp("num_samps", ch) == 0) runmanager.GetDconfig().Samples = arg1;
 }
 
 void Server::UpdateParametersField(int nevent)
@@ -112,51 +124,51 @@ void Server::UpdateParametersField(int nevent)
     std::string temp_string;
     char temp_char[200];
 
-    sprintf(temp_char,"Running \n%d / %d\n", nevent, runmanager.GetConfig()->GetNevents());
+    sprintf(temp_char,"Running \n%d / %d\n", nevent, runmanager.GetRunParameters().Nevents);
     serv->SetItemField("/Status", "value", temp_char);
     serv->SetItemField("/Status", "_status", "1");	 
     serv->SetItemField("/Fits", "value", "Undefined");
 
-    sprintf(temp_char, "Run will stop after %d events or %d seconds", runmanager.GetConfig()->GetNevents(), runmanager.GetConfig()->GetActime());
+    sprintf(temp_char, "Run will stop after %d events or %d seconds", runmanager.GetRunParameters().Nevents, runmanager.GetRunParameters().Nevents);
     temp_string += temp_char;
-    sprintf(temp_char, "\nNumber of samples = %d", runmanager.GetConfig()->GetNsamples());
+    sprintf(temp_char, "\nNumber of samples = %d", runmanager.GetDconfig().Samples);
     temp_string += temp_char;
-    sprintf(temp_char, "\nPostTrigger = %d ", runmanager.GetConfig()->GetPostTrigger());
+    sprintf(temp_char, "\nPostTrigger = %d ", runmanager.GetDconfig().PostTrigger);
     temp_string += temp_char;
     sprintf(temp_char, "\nTrigger channels: ");
     temp_string += temp_char;
-    for (int i = 0; i < runmanager.GetConfig()->GetNumChannels(); i++) if (runmanager.GetConfig()->GetChType(i) == 2)
+    for (int i = 0; i < runmanager.GetRunParameters().NumChannels; i++) if (runmanager.GetDconfig().chtype_db[i] == 2)
     {
         sprintf(temp_char,"%d ", i);
         temp_string += temp_char;
     }
     sprintf(temp_char, "\n");
     temp_string += temp_char;
-    for (int i = 0; i < runmanager.GetConfig()->GetNumChannels(); i++) if (runmanager.GetConfig()->GetChType(i) == 2)
+    for (int i = 0; i < runmanager.GetRunParameters().NumChannels; i++) if (runmanager.GetDconfig().chtype_db[i] == 2)
     {
-        sprintf(temp_char, "Channel %d threshold = %d\n", i, runmanager.GetConfig()->GetChThreshold(i));
+        sprintf(temp_char, "Channel %d threshold = %d\n", i, runmanager.GetDconfig().thresh_db[i]);
         temp_string += temp_char;
     }
     sprintf(temp_char, "\n");
-    for (int i = 0; i < runmanager.GetConfig()->GetNumChannels(); i++) if (runmanager.GetConfig()->GetChType(i) > 0)
+    for (int i = 0; i < runmanager.GetRunParameters().NumChannels; i++) if (runmanager.GetDconfig().chtype_db[i] > 0)
     {
-        sprintf(temp_char, "Channel %d DCoffset = %d\n", i, runmanager.GetConfig()->GetChDCoffset(i));
+        sprintf(temp_char, "Channel %d DCoffset = %d\n", i, runmanager.GetDconfig().dcoffset_db[i]);
         temp_string += temp_char;
     }
-    sprintf (temp_char,"\nIntegration window width = %d\n", runmanager.GetConfig()->GetWindowWidth());
+    sprintf (temp_char,"\nIntegration window width = %d\n", runmanager.GetAconfig().WindowWidth);
     temp_string += temp_char;
-    for (int i = 0; i < runmanager.GetConfig()->GetNumChannels(); i++) if (runmanager.GetConfig()->GetChType(i) > 0)
+    for (int i = 0; i < runmanager.GetRunParameters().NumChannels; i++) if (runmanager.GetDconfig().chtype_db[i] > 0)
     {
-        sprintf(temp_char, "Channel %d trigger window = (%d, %d)\n", i, runmanager.GetConfig()->GetChIntSig(i), runmanager.GetConfig()->GetChIntSig(i) - runmanager.GetConfig()->GetWindowWidth());
+        sprintf(temp_char, "Channel %d trigger window = (%d, %d)\n", i, runmanager.GetAconfig().intsig_db[i], runmanager.GetAconfig().intbl_db[i] - runmanager.GetAconfig().WindowWidth);
         temp_string += temp_char;
     }
-    sprintf (temp_char,"Charge Histos Range = (%d, %d)\n", runmanager.GetConfig()->GetRmin(), runmanager.GetConfig()->GetRmax());
+    sprintf (temp_char,"Charge Histos Range = (%d, %d)\n", runmanager.GetAconfig().rmin, runmanager.GetAconfig().rmax);
     temp_string += temp_char;
-    sprintf (temp_char,"Vpp = %d\n", runmanager.GetConfig()->GetVpp());
+    sprintf (temp_char,"Vpp = %d\n", runmanager.GetDconfig().Vpp);
     temp_string += temp_char;
-    sprintf (temp_char,"CreateFit = %d\n", runmanager.GetConfig()->GetCreateFit());
+    sprintf (temp_char,"CreateFit = %d\n", runmanager.GetAconfig().CreateFit);
     temp_string += temp_char;
-    sprintf (temp_char,"Read Temperatures = %d\n", runmanager.GetConfig()->GetReadTemp());
+    sprintf (temp_char,"Read Temperatures = %d\n", runmanager.GetRunParameters().ReadTemp);
     temp_string += temp_char;
     str = temp_string.c_str();
     // str = "Hello";

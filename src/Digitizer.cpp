@@ -159,13 +159,13 @@ void Digitizer::WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t m
     Execute(CAEN_DGTZ_WriteRegister(handle, address, d32));
 }
 
-DigiData &Digitizer::ReadEvent(int &nevent, long CurrentTime)
+DigiData &Digitizer::ReadEvent(int &nevent)
 {
      // printf("read\n");
     
     uint32_t NEvents = 0;
     uint32_t lstatus;
-    uint32_t ElapsedTime;
+    uint32_t ElapsedTime, CurrentTime;
     CAEN_DGTZ_ErrorCode ret;
 
 
@@ -177,7 +177,7 @@ DigiData &Digitizer::ReadEvent(int &nevent, long CurrentTime)
     Nbytes += BufferSize;
     Nevs += NEvents;
     nevent +=NEvents;
-    // SetCurrentTime();
+    CurrentTime = GetCurrentTime();
     ElapsedTime = CurrentTime - PrevRateTime;
     nCycles++;
 

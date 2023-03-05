@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include "CAENDigitizerEmu.h"
-// #include "Config.h"
+#include "utils.h"
 #include "DataFrames.h"
 
 class Digitizer
@@ -13,10 +13,12 @@ public:
     // CAEN_DGTZ_ErrorCode GetRet() {return ret;}
     CAEN_DGTZ_ErrorCode Execute(CAEN_DGTZ_ErrorCode ret);
 	void Program(Dconfig &conf);//
-	DigiData &ReadEvent(int &nevent, long CurrentTime);
+	DigiData &ReadEvent(int &nevent);
 
 	uint16_t GetEnabledMask() {return EnabledMask;}
 	void SetEnabledMask(uint16_t enmask) {EnabledMask = enmask;}
+	
+	void SetPrevRateTime(long CurrentTime) {PrevRateTime = CurrentTime;}
 	// friend void intHandler(int dummy);
 protected:
 	void AndTriggger(Dconfig &conf);//

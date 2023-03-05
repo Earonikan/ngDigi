@@ -19,7 +19,7 @@ int main(int argc, char *argv[])
     signal(SIGINT, myHandler);
 
     runmanager.ReadAllConfigsFromFile(argv[1]);
-    digitizer->Program(runmanager.GetDconfig())
+    digitizer->Program(runmanager.GetDconfig());
 
     runmanager.Configure(server, digitizer);
     runmanager.Run();

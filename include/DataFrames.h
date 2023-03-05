@@ -43,7 +43,7 @@ struct RunParameters
     uint32_t Nevents;
     int run_status; //0 - finished, 1 - standby, 2 - running
     int Actime;
-    int CurrentTime;
+    long StartTime;
 
     int NumChannels;
 

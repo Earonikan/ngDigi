@@ -17,11 +17,10 @@ void RunManager::Run()
     while (runparameters.run_status)
     {
         int nevent = 0;//HERE!!!!!!!!!!!!
+        digitizer->SetPrevRateTime(GetCurrentTime());
         while (runparameters.run_status > 1)
         {
-    //         readdigitizer();
             digitizer->ReadEvent(nevent);
-            // nevent++;
             server->UpdateParametersField(nevent);
     //         if ((Nevents!=0)&&(nevent>Nevents)) cmdStop();
     //         if((Actime!=0)&&((CurrentTime-StartTime)>Actime*1000)) {cout<<CurrentTime<<"  "<<StartTime<<endl;cmdStop();}
@@ -81,11 +80,4 @@ int RunManager::ReturnZeroCh(std::vector<int> &vec)
 {
     std::cout << "Wrong number of channel, it returned zero channel instead" << std::endl;
     return vec[0];
-}
-
-void SetCurrentTime()
-{
-    struct timeval t1;
-    gettimeofday(&t1, NULL);
-    runparameters.CurrentTime = (t1.tv_sec) * 1000 + t1.tv_usec / 1000;
 }
