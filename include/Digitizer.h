@@ -2,8 +2,8 @@
 
 #include "stdafx.h"
 #include "CAENDigitizerEmu.h"
-#include "utils.h"
 #include "DataFrames.h"
+#include "utils.h"
 
 class Digitizer
 {
@@ -13,34 +13,36 @@ public:
     // CAEN_DGTZ_ErrorCode GetRet() {return ret;}
     CAEN_DGTZ_ErrorCode Execute(CAEN_DGTZ_ErrorCode ret);
 	void Program(Dconfig &conf);//
-	DigiData &ReadEvent(int &nevent);
+	DigiData &ReadEvent();
 
 	uint16_t GetEnabledMask() {return EnabledMask;}
 	void SetEnabledMask(uint16_t enmask) {EnabledMask = enmask;}
 	
-	void SetPrevRateTime(long CurrentTime) {PrevRateTime = CurrentTime;}
+	void SetDconfig(Dconfig dconfig) {this->dconfig = dconfig;}
+	void SetRunParameters(RunParameters &runparameters) {this->runparameters = runparameters;}
 	// friend void intHandler(int dummy);
+	void AllocateEvents();
+
+	// friend long GetCurrentTime();
 protected:
 	void AndTriggger(Dconfig &conf);//
 	void OrTriggger();//
 	void WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);private:
+private:
 	Dconfig dconfig;
+	Rconfig rconfig;
 	RunParameters runparameters;
 	DigiData digidata;
     // CAEN_DGTZ_ErrorCode ret;
 	char *buffer = nullptr;
 	char *EventPtr = nullptr;
 	uint32_t BufferSize;
+	uint32_t AllocatedSize;
     CAEN_DGTZ_BoardInfo_t BoardInfo;
     int MajorNumber;
-    int handle;
-	int Nbytes;
-	int Nevs;
-	int nCycles;
 	// long CurrentTime;
-	long PrevRateTime;
 	uint16_t EnabledMask = 0;
-	int NTrigChannels = 0;
+	uint32_t NTrigChannels = 0;
 	std::vector<CAEN_DGTZ_TriggerMode_t> ChannelTriggerMode;
 	std::string errors[34] = {"Operation completed successfully", //0
 				  "Communication error",  //1

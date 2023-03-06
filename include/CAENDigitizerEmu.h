@@ -176,7 +176,7 @@ inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_SetChannelPulsePolarity(int handle, uint32_
 
 inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_ReadRegister(int handle, uint32_t Address, uint32_t *Data){return CAEN_DGTZ_Success;}
 
-inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetNumEvents(int handle, char *buffer, uint32_t buffsize, uint32_t *numEvents){return CAEN_DGTZ_Success;}
+inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetNumEvents(int handle, char *buffer, uint32_t buffsize, uint32_t *numEvents);
 
 inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetEventInfo(int handle, char *buffer, uint32_t buffsize, int32_t numEvent, CAEN_DGTZ_EventInfo_t *eventInfo, char **EventPtr){return CAEN_DGTZ_Success;}
 

@@ -3,6 +3,7 @@
 #include "stdafx.h"
 #include "RunManager.h"
 #include "DataFrames.h"
+#include "utils.h"
 
 // class RunManager;
 
@@ -12,18 +13,18 @@ public:
     Server();
     ~Server();
 
-    void UpdateParametersField(int nevent);
+    void UpdateParametersField();
     // void Connect2RunManager(RunManager *rman) {runmanager = rman;}
 
     friend void cmdStart();
     friend void cmdStop();
     friend void ChangeParameter(int arg1, int arg2, const char *ch);
+    
     // void ProcessRequests() {serv->ProcessRequest();}
 private:
     THttpServer *serv;
-    RunParameters runparameters;
+    // RunParameters runparameters;
 	DigiData digidata;
-    long StartTime;
     // RunManager *runmanager;
     const char *str; // text field about current parameters
 };

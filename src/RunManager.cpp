@@ -4,30 +4,29 @@ void RunManager::Configure(Server *server, Digitizer *digitizer)
 {
     this->server = server;
     this->digitizer = digitizer;
-    // this->config = config;
 
-    // server->Connect2RunManager(this);
+    rconfig.run_status = 1;
+    runparameters.nevent = 0;
 }
 
 void RunManager::Run()
 {
-    runparameters.run_status = 1;
     digitizer->Program(dconfig);
-    server->UpdateParametersField(0);
-    while (runparameters.run_status)
+    server->UpdateParametersField();
+    while (rconfig.run_status)
     {
-        int nevent = 0;//HERE!!!!!!!!!!!!
-        digitizer->SetPrevRateTime(GetCurrentTime());
-        while (runparameters.run_status > 1)
+        //HERE!!!!!!!!!!!!
+        digitizer->SetRunParameters(runparameters);
+        gSystem->ProcessEvents();
+        while (rconfig.run_status > 1)
         {
-            digitizer->ReadEvent(nevent);
-            server->UpdateParametersField(nevent);
+            digitizer->ReadEvent();
+            server->UpdateParametersField();
     //         if ((Nevents!=0)&&(nevent>Nevents)) cmdStop();
     //         if((Actime!=0)&&((CurrentTime-StartTime)>Actime*1000)) {cout<<CurrentTime<<"  "<<StartTime<<endl;cmdStop();}
             gSystem->ProcessEvents();
         }
     //     server.ProcessRequests();
-        gSystem->ProcessEvents();
     }
 }
 
@@ -35,13 +34,13 @@ void RunManager::ReadAllConfigsFromFile(std::string cfgfilename)
 {
     ConfigFile config(cfgfilename);
 
-    runparameters.Nevents = config.read<int>("nevents");
-    runparameters.Actime = config.read<int>("actime");
+    rconfig.Nevents = config.read<int>("nevents");
+    rconfig.Actime = config.read<int>("actime");
     dconfig.Vpp = config.read<bool>("vpp");
     dconfig.TrigType = config.read<bool>("trtype");
     aconfig.WindowWidth = config.read<int>("windowwidth");
     aconfig.CreateFit = config.read<bool>("fit");
-    runparameters.ReadTemp = config.read<bool>("readtemp");    
+    rconfig.ReadTemp = config.read<bool>("readtemp");    
     dconfig.Samples = config.read<int>("samples");
     dconfig.PostTrigger = config.read<int>("posttrigger");
     aconfig.rmin = config.read<int>("rmin");
@@ -57,7 +56,7 @@ void RunManager::ReadAllConfigsFromFile(std::string cfgfilename)
     for (auto i : aconfig.intsig_db) aconfig.intbl_db.push_back(i-aconfig.WindowWidth);
     RunManager::ReadParameters2Vect(config.read<string>("polarity").data(), dconfig.trigpol_db);
 
-    // for (auto i : intbl) std::cout << i << std::endl;
+    // for (auto i : dconfig.chtype_db) std::cout << i << std::endl;
 }
 
 void RunManager::ReadParameters2Vect(std::string str, std::vector<int> &parameter)
@@ -73,7 +72,7 @@ void RunManager::ReadParameters2Vect(std::string str, std::vector<int> &paramete
             num.clear();
         }
     }
-    runparameters.NumChannels = parameter.size();
+    dconfig.NumChannels = parameter.size();
 }
 
 int RunManager::ReturnZeroCh(std::vector<int> &vec)

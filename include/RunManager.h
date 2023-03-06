@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "utils.h"
 #include "ConfigFile.h"
 #include "Server.h"
 #include "Digitizer.h"
@@ -19,21 +18,25 @@ public:
     void Run();
     void ReadAllConfigsFromFile(std::string cfgfilename);
 
-    void SetStatus(int status) {runparameters.run_status = status;}
-    int GetStatus() {return runparameters.run_status;}
+    void SetStatus(int status) {rconfig.run_status = status;}
+    int GetStatus() {return rconfig.run_status;}
 
     Dconfig &GetDconfig() {return dconfig;}
     Aconfig &GetAconfig() {return aconfig;}
     RunParameters &GetRunParameters() {return runparameters;}
+    Rconfig &GetRconfig() {return rconfig;}
+
+    Digitizer *GetDigitizer() {return digitizer;}
+    
 private:
     
     Server *server;
     Digitizer *digitizer;
-    // Config *config;
 
     RunParameters runparameters;
     Dconfig dconfig;
     Aconfig aconfig;
+    Rconfig rconfig;
     DigiData digidata;
 
     //helpers

@@ -16,6 +16,7 @@ struct Dconfig
 
     int CoincidenceWindow;
     int EventAggregation;
+    int NumChannels;
     
     bool TrigType;
 };
@@ -38,14 +39,23 @@ struct DigiData
     CAEN_DGTZ_EventInfo_t EventInfo;
 };
 
-struct RunParameters
+struct Rconfig
 {
     uint32_t Nevents;
     int run_status; //0 - finished, 1 - standby, 2 - running
     int Actime;
     long StartTime;
 
-    int NumChannels;
-
     bool ReadTemp = 0;
+};
+
+struct RunParameters
+{
+	int Nbytes;
+	int Nevs;
+	int nCycles;
+    int nevent;
+    int handle;
+    
+	long PrevRateTime;
 };

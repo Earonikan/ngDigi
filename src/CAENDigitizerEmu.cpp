@@ -14,8 +14,7 @@ CAEN_DGTZ_ErrorCode CAEN_DGTZ_CloseDigitizer(int handle)
 }
 
 CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetInfo(int handle, CAEN_DGTZ_BoardInfo_t *BoardInfo)
-{
-    
+{    
     strcpy(BoardInfo->ModelName, "fake digi");
     BoardInfo->Model = 8888;
     BoardInfo->Channels = 8;
@@ -31,6 +30,11 @@ CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetInfo(int handle, CAEN_DGTZ_BoardInfo_t *BoardIn
     BoardInfo->CommHandle = 0;
     BoardInfo->VMEHandle = 0;
     strcpy(BoardInfo->License, "licence");
+
     return CAEN_DGTZ_Success;
 }
 
+CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetNumEvents(int handle, char *buffer, uint32_t buffsize, uint32_t *numEvents)
+{
+    return CAEN_DGTZ_Success;
+}

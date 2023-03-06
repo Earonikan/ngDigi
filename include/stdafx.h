@@ -14,6 +14,7 @@
 #include <bitset>
 
 // Root headers
+#ifndef MIDASSYS
 #include "TROOT.h"
 #include "TTree.h"
 #include "TFile.h"
@@ -31,4 +32,4 @@
 #include "TObjString.h"
 #include "TSystem.h"
 #include "TNamed.h"
-// #include "RQ_OBJECT.h"
+#endif
