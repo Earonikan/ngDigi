@@ -5,6 +5,7 @@
 #include <chrono>
 #include "signal.h"
 #include <sys/time.h>
+#include <pthread.h>
 #include <sstream>
 #include <string>
 #include <iterator>
@@ -12,6 +13,7 @@
 #include <array>
 #include <vector>
 #include <bitset>
+#include <typeinfo> 
 
 // Root headers
 #ifndef MIDASSYS

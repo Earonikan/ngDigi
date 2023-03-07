@@ -17,6 +17,8 @@ int main(int argc, char *argv[])
     signal(SIGINT, myHandler);
 
     runmanager.ReadAllConfigsFromFile(argv[1]);
+    // std::cout << runmanager.GetDconfig().test_db[0] << std::endl;
+    // runmanager.ReadAllConfigsFromFile("dconfnew.cfg");
     runmanager.Configure(server, digitizer);
     runmanager.Run();
 
@@ -30,7 +32,7 @@ int main(int argc, char *argv[])
 
 void myHandler(int dummy)
 {
-    std::cout << "stopping..." << std::endl;
+    // std::cout << "stopping..." << std::endl;
     sleep(1);
     std::cout << "exiting..." << std::endl;
     runmanager.SetStatus(0);

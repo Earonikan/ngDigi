@@ -20,14 +20,18 @@ public:
 	
 	void SetDconfig(Dconfig dconfig) {this->dconfig = dconfig;}
 	void SetRunParameters(RunParameters &runparameters) {this->runparameters = runparameters;}
+	// RunParameters &GetRunParameters() {return runparameters;}
 	// friend void intHandler(int dummy);
 	void AllocateEvents();
+
+	int GetRunStatus() {return runparameters.nevent;}
 
 	// friend long GetCurrentTime();
 protected:
 	void AndTriggger(Dconfig &conf);//
 	void OrTriggger();//
 	void WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);private:
+	// void SetVerbose(bool verbose) {Verbose = verbose;}
 private:
 	Dconfig dconfig;
 	Rconfig rconfig;
@@ -40,6 +44,7 @@ private:
 	uint32_t AllocatedSize;
     CAEN_DGTZ_BoardInfo_t BoardInfo;
     int MajorNumber;
+	// bool Verbose;
 	// long CurrentTime;
 	uint16_t EnabledMask = 0;
 	uint32_t NTrigChannels = 0;

@@ -34,7 +34,17 @@ CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetInfo(int handle, CAEN_DGTZ_BoardInfo_t *BoardIn
     return CAEN_DGTZ_Success;
 }
 
+CAEN_DGTZ_ErrorCode CAEN_DGTZ_ReadData(int handle, CAEN_DGTZ_ReadMode_t mode, char *buffer, uint32_t *bufferSize)
+{
+
+    buffer = nullptr;
+    *bufferSize = 8;
+
+    return CAEN_DGTZ_Success;
+}
+
 CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetNumEvents(int handle, char *buffer, uint32_t buffsize, uint32_t *numEvents)
 {
+    *numEvents = 1;
     return CAEN_DGTZ_Success;
 }

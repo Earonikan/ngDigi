@@ -142,7 +142,7 @@ inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_SWStopAcquisition(int handle){return CAEN_D
 
 inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_AllocateEvent(int handle, void **Evt){return CAEN_DGTZ_Success;}
 
-inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_ReadData(int handle, CAEN_DGTZ_ReadMode_t mode, char *buffer, uint32_t *bufferSize){return CAEN_DGTZ_Success;}
+CAEN_DGTZ_ErrorCode CAEN_DGTZ_ReadData(int handle, CAEN_DGTZ_ReadMode_t mode, char *buffer, uint32_t *bufferSize); //{return CAEN_DGTZ_Success;}
 
 CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetInfo(int handle, CAEN_DGTZ_BoardInfo_t *BoardInfo);
 
@@ -176,7 +176,7 @@ inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_SetChannelPulsePolarity(int handle, uint32_
 
 inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_ReadRegister(int handle, uint32_t Address, uint32_t *Data){return CAEN_DGTZ_Success;}
 
-inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetNumEvents(int handle, char *buffer, uint32_t buffsize, uint32_t *numEvents);
+CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetNumEvents(int handle, char *buffer, uint32_t buffsize, uint32_t *numEvents);// {return CAEN_DGTZ_Success;}
 
 inline CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetEventInfo(int handle, char *buffer, uint32_t buffsize, int32_t numEvent, CAEN_DGTZ_EventInfo_t *eventInfo, char **EventPtr){return CAEN_DGTZ_Success;}
 

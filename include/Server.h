@@ -18,7 +18,8 @@ public:
 
     friend void cmdStart();
     friend void cmdStop();
-    friend void ChangeParameter(int arg1, int arg2, const char *ch);
+    friend void ChangeParameterOne(int arg1, const char *ch);
+    friend void ChangeParameterTwo(int arg1, int arg2, const char *ch);
     
     // void ProcessRequests() {serv->ProcessRequest();}
 private:

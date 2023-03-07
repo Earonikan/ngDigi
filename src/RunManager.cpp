@@ -1,32 +1,55 @@
 #include "RunManager.h"
 
+void cmdStop();
+
 void RunManager::Configure(Server *server, Digitizer *digitizer)
 {
     this->server = server;
     this->digitizer = digitizer;
 
-    rconfig.run_status = 1;
+    runparameters.run_status = 1;
+    runparameters.NeedToProgram = 1;
     runparameters.nevent = 0;
 }
 
 void RunManager::Run()
 {
-    digitizer->Program(dconfig);
-    server->UpdateParametersField();
-    while (rconfig.run_status)
+    // digitizer->Program(dconfig);
+    // server->UpdateParametersField();
+    while (runparameters.run_status)
     {
-        //HERE!!!!!!!!!!!!
-        digitizer->SetRunParameters(runparameters);
         gSystem->ProcessEvents();
-        while (rconfig.run_status > 1)
+        server->UpdateParametersField();
+        digitizer->SetRunParameters(runparameters);
+
+        // std::cout << digitizer->GetRunStatus() << std::endl;
+        
+        if (runparameters.NeedToProgram == 1)
+        {
+            digitizer->Program(dconfig);
+            runparameters.NeedToProgram = 0;
+        }
+
+        while (runparameters.run_status > 1)
         {
             digitizer->ReadEvent();
             server->UpdateParametersField();
-    //         if ((Nevents!=0)&&(nevent>Nevents)) cmdStop();
-    //         if((Actime!=0)&&((CurrentTime-StartTime)>Actime*1000)) {cout<<CurrentTime<<"  "<<StartTime<<endl;cmdStop();}
+            sleep(5);
+            std::cout << runparameters.nevent << " " << digitizer->GetRunStatus() << std::endl;
+
+            if ((rconfig.Nevents != 0) && (runparameters.nevent > rconfig.Nevents)) 
+            {
+                std::cout << "HERE" << std::endl;
+                cmdStop();
+            }
+            // std::cout << runparameters.PrevRateTime << "  " << rconfig.StartTime << std::endl;
+            if ((rconfig.Actime != 0) && ((runparameters.PrevRateTime-rconfig.StartTime) > rconfig.Actime*1000))
+            {
+                std::cout << runparameters.PrevRateTime << "  " << rconfig.StartTime << std::endl;
+                cmdStop();
+            }
             gSystem->ProcessEvents();
         }
-    //     server.ProcessRequests();
     }
 }
 
@@ -48,6 +71,7 @@ void RunManager::ReadAllConfigsFromFile(std::string cfgfilename)
     dconfig.CoincidenceWindow = config.read<int>("coincidence_window");
     dconfig.MajorityLevel = config.read<int>("majority_level");
     dconfig.EventAggregation = config.read<int>("event_aggreagation");
+    // dconfig.test = config.read<float>("test");
 
     RunManager::ReadParameters2Vect(config.read<string>("chtype").data(), dconfig.chtype_db);
     RunManager::ReadParameters2Vect(config.read<string>("thresh").data(), dconfig.thresh_db);
@@ -56,10 +80,12 @@ void RunManager::ReadAllConfigsFromFile(std::string cfgfilename)
     for (auto i : aconfig.intsig_db) aconfig.intbl_db.push_back(i-aconfig.WindowWidth);
     RunManager::ReadParameters2Vect(config.read<string>("polarity").data(), dconfig.trigpol_db);
 
+    // RunManager::ReadParameters2Vect(config.read<string>("test").data(), dconfig.test_db);
     // for (auto i : dconfig.chtype_db) std::cout << i << std::endl;
 }
 
-void RunManager::ReadParameters2Vect(std::string str, std::vector<int> &parameter)
+template <typename T>
+void RunManager::ReadParameters2Vect(std::string str, std::vector<T> &parameter)
 {
     str +=",";
     std::string num;
@@ -68,14 +94,16 @@ void RunManager::ReadParameters2Vect(std::string str, std::vector<int> &paramete
         if (str[i] != ',') num.append(1, str[i]);
         else
         {
-            parameter.push_back(std::stoi(num));
+            if (typeid(T) == typeid(int)) parameter.push_back(std::stoi(num));
+            if (typeid(T) == typeid(float)) parameter.push_back(std::stof(num));
             num.clear();
         }
     }
     dconfig.NumChannels = parameter.size();
 }
 
-int RunManager::ReturnZeroCh(std::vector<int> &vec)
+template <typename T>
+int RunManager::ReturnZeroCh(std::vector<T> &vec)
 {
     std::cout << "Wrong number of channel, it returned zero channel instead" << std::endl;
     return vec[0];

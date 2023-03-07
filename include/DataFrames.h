@@ -19,6 +19,9 @@ struct Dconfig
     int NumChannels;
     
     bool TrigType;
+
+    //float test;
+    // std::vector<float> test_db;
 };
 
 struct Aconfig
@@ -41,8 +44,8 @@ struct DigiData
 
 struct Rconfig
 {
-    uint32_t Nevents;
-    int run_status; //0 - finished, 1 - standby, 2 - running
+    int Nevents;
+    
     int Actime;
     long StartTime;
 
@@ -56,6 +59,9 @@ struct RunParameters
 	int nCycles;
     int nevent;
     int handle;
+    int run_status; //0 - finished, 1 - standby, 2 - running
     
 	long PrevRateTime;
+
+    bool NeedToProgram;
 };

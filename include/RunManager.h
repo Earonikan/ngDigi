@@ -10,6 +10,7 @@
 class Digitizer;
 class Server; 
 
+// template <typename T>
 class RunManager
 {
 public:
@@ -18,8 +19,8 @@ public:
     void Run();
     void ReadAllConfigsFromFile(std::string cfgfilename);
 
-    void SetStatus(int status) {rconfig.run_status = status;}
-    int GetStatus() {return rconfig.run_status;}
+    void SetStatus(int status) {runparameters.run_status = status;}
+    int GetStatus() {return runparameters.run_status;}
 
     Dconfig &GetDconfig() {return dconfig;}
     Aconfig &GetAconfig() {return aconfig;}
@@ -40,7 +41,9 @@ private:
     DigiData digidata;
 
     //helpers
-    void ReadParameters2Vect(std::string str, std::vector<int> &parameter);
-    int ReturnZeroCh(std::vector<int> &vec);
+    template <typename T>
+    void ReadParameters2Vect(std::string str, std::vector<T> &parameter);
+    template <typename T>
+    int ReturnZeroCh(std::vector<T> &vec);
     
 };

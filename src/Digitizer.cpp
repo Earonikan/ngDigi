@@ -22,6 +22,7 @@ Digitizer::Digitizer()
 
 void Digitizer::Program(Dconfig &conf)
 {
+    // SetVerbose(verbose);
     SetDconfig(conf);
     Execute(CAEN_DGTZ_Reset(runparameters.handle));
     Execute(CAEN_DGTZ_SetRecordLength(runparameters.handle, conf.Samples));
@@ -74,6 +75,8 @@ void Digitizer::Program(Dconfig &conf)
     else OrTriggger();	
         
     std::cout << "Programming finished!" << std::endl;
+
+    // SetVerbose(0);
 }
 
 Digitizer::~Digitizer()
@@ -170,6 +173,7 @@ DigiData &Digitizer::ReadEvent()
     uint32_t ElapsedTime, CurrentTime;
     CAEN_DGTZ_ErrorCode ret;
 
+    Execute(CAEN_DGTZ_ReadData(runparameters.handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &BufferSize));
 
     if (BufferSize != 0) {ret = Execute(CAEN_DGTZ_GetNumEvents(runparameters.handle, buffer, BufferSize, &NEvents));}
     else {ret = Execute(CAEN_DGTZ_ReadRegister(runparameters.handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus));}
@@ -178,7 +182,7 @@ DigiData &Digitizer::ReadEvent()
     
     runparameters.Nbytes += BufferSize;
     runparameters.Nevs += NEvents;
-    runparameters.nevent +=NEvents;
+    runparameters.nevent += NEvents;
     CurrentTime = GetCurrentTime();
     ElapsedTime = CurrentTime - runparameters.PrevRateTime;
     runparameters.nCycles++;
