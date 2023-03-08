@@ -14,36 +14,50 @@ class Server;
 class RunManager
 {
 public:
-    RunManager() {;} //ini run parameters
-    void Configure(Server *server, Digitizer *digitizer); //configure 
+    RunManager(std::string cfgfilename); //read all configs from file
+    ~RunManager();
+    void Configure(); //configure 
     void Run();
-    void ReadAllConfigsFromFile(std::string cfgfilename);
+    
+    void StartRun();
+    void StopRun();
 
-    void SetStatus(int status) {runparameters.run_status = status;}
-    int GetStatus() {return runparameters.run_status;}
+    void SetStatus(int status) {runparameters_.run_status = status;}
+    int GetStatus() {return runparameters_.run_status;}
 
-    Dconfig &GetDconfig() {return dconfig;}
-    Aconfig &GetAconfig() {return aconfig;}
-    RunParameters &GetRunParameters() {return runparameters;}
-    Rconfig &GetRconfig() {return rconfig;}
+    RunParameters GetRunParameters() {return runparameters_;}
+    Dconfig GetDconfig() {return dconfig_;}
+    Aconfig GetAconfig() {return aconfig_;}
+    Rconfig GetRconfig() {return rconfig_;}
+    DigiData GetDigiData() {return digidata_;}
+
+    void SetParameter(int arg1, const char *ch);
+    void SetVecParameter(int arg1, int arg2, const char *ch);
+
+    void SetRunParameters(RunParameters runparameters) {runparameters_ = runparameters;}
+    void GetDconfig(Dconfig dconfig) {dconfig_ = dconfig;}
+    void GetAconfig(Aconfig aconfig) {aconfig_ = aconfig;}
+    void GetRconfig(Rconfig rconfig) {rconfig_ = rconfig;}
+    void GetDigiData(DigiData digidata) {digidata_ = digidata;}
 
     Digitizer *GetDigitizer() {return digitizer;}
+    Server *GetServer() {return server;}
     
 private:
     
     Server *server;
     Digitizer *digitizer;
 
-    RunParameters runparameters;
-    Dconfig dconfig;
-    Aconfig aconfig;
-    Rconfig rconfig;
-    DigiData digidata;
+    RunParameters runparameters_;
+    Dconfig dconfig_;
+    Aconfig aconfig_;
+    Rconfig rconfig_;
+    DigiData digidata_;
 
     //helpers
     template <typename T>
     void ReadParameters2Vect(std::string str, std::vector<T> &parameter);
-    template <typename T>
-    int ReturnZeroCh(std::vector<T> &vec);
+    // template <typename T>
+    // int ReturnZeroCh(std::vector<T> &vec);
     
 };

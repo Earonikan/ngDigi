@@ -3,13 +3,13 @@
 
 CAEN_DGTZ_ErrorCode CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNode, uint32_t VMEBaseAddress, int *handle)
 {
-    std::cout << "Open Digitizer!" << std::endl;
+    std::cout << "Opening Digitizer!" << std::endl;
     return CAEN_DGTZ_Success;
 }
 
 CAEN_DGTZ_ErrorCode CAEN_DGTZ_CloseDigitizer(int handle)
 {
-    std::cout << "Close Digitizer!" << std::endl;
+    std::cout << "Closing Digitizer!" << std::endl;
     return CAEN_DGTZ_Success;
 }
 

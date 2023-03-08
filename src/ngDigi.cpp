@@ -4,36 +4,24 @@
 #include "RunManager.h"
 #include "Server.h"
 #include "utils.h"
+#include "GlobalWrapper.h"
 
-void myHandler(int dummy);
-
-RunManager runmanager;
 
 int main(int argc, char *argv[])
 {
-    Digitizer *digitizer = new Digitizer();
-    Server *server = new Server();
+    // Digitizer *digitizer = new Digitizer();
+    // Server *server = new Server();
+    RunManager runmanager(argv[1]);
+
+    GlobalWrapper<RunManager>::GetInstance().Setter(&runmanager);
     
     signal(SIGINT, myHandler);
 
-    runmanager.ReadAllConfigsFromFile(argv[1]);
-    // std::cout << runmanager.GetDconfig().test_db[0] << std::endl;
-    // runmanager.ReadAllConfigsFromFile("dconfnew.cfg");
-    runmanager.Configure(server, digitizer);
+    runmanager.Configure();
     runmanager.Run();
 
-
-    delete digitizer;
-    delete server;
+    // runmanager.ReadAllConfigsFromFile("dconfnew.cfg");
 
     return 0;
 
-}
-
-void myHandler(int dummy)
-{
-    // std::cout << "stopping..." << std::endl;
-    sleep(1);
-    std::cout << "exiting..." << std::endl;
-    runmanager.SetStatus(0);
 }

@@ -3,8 +3,8 @@
 Digitizer::Digitizer()
 {
     // Execute(CAEN_DGTZ_Success;
-    Execute(CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, 0, 0, 0, &runparameters.handle));
-    Execute(CAEN_DGTZ_GetInfo(runparameters.handle, &BoardInfo));
+    Execute(CAEN_DGTZ_OpenDigitizer(CAEN_DGTZ_USB, 0, 0, 0, &runparameters_.handle));
+    Execute(CAEN_DGTZ_GetInfo(runparameters_.handle, &BoardInfo));
     for (uint32_t i = 0 ; i < BoardInfo.Channels; i++) ChannelTriggerMode.push_back(CAEN_DGTZ_TRGMODE_DISABLED);
     NTrigChannels = ChannelTriggerMode.size();
 
@@ -20,24 +20,22 @@ Digitizer::Digitizer()
     }
 }
 
-void Digitizer::Program(Dconfig &conf)
+void Digitizer::Program()
 {
-    // SetVerbose(verbose);
-    SetDconfig(conf);
-    Execute(CAEN_DGTZ_Reset(runparameters.handle));
-    Execute(CAEN_DGTZ_SetRecordLength(runparameters.handle, conf.Samples));
-    Execute(CAEN_DGTZ_SetPostTriggerSize(runparameters.handle, conf.PostTrigger));
-    Execute(CAEN_DGTZ_SetMaxNumEventsBLT(runparameters.handle, conf.EventAggregation));
-    Execute(CAEN_DGTZ_SetAcquisitionMode(runparameters.handle, CAEN_DGTZ_SW_CONTROLLED));
-    Execute(CAEN_DGTZ_SetExtTriggerInputMode(runparameters.handle, CAEN_DGTZ_TRGMODE_ACQ_ONLY));
-    Execute(CAEN_DGTZ_WriteRegister(runparameters.handle, 0x8028, conf.Vpp));
+    Execute(CAEN_DGTZ_Reset(runparameters_.handle));
+    Execute(CAEN_DGTZ_SetRecordLength(runparameters_.handle, dconfig_.Samples));
+    Execute(CAEN_DGTZ_SetPostTriggerSize(runparameters_.handle, dconfig_.PostTrigger));
+    Execute(CAEN_DGTZ_SetMaxNumEventsBLT(runparameters_.handle, dconfig_.EventAggregation));
+    Execute(CAEN_DGTZ_SetAcquisitionMode(runparameters_.handle, CAEN_DGTZ_SW_CONTROLLED));
+    Execute(CAEN_DGTZ_SetExtTriggerInputMode(runparameters_.handle, CAEN_DGTZ_TRGMODE_ACQ_ONLY));
+    Execute(CAEN_DGTZ_WriteRegister(runparameters_.handle, 0x8028, dconfig_.Vpp));
 
-    for (int i = 0; i < dconfig.NumChannels; i++)
+    for (int i = 0; i < dconfig_.NumChannels; i++)
     {
-        switch (conf.chtype_db[i])
+        switch (dconfig_.chtype_db[i])
         {
             case 0:
-                // conf.SetChThreshold(i, 0);
+                // dconfig_.SetChThreshold(i, 0);
                 std::cout << "Disable channel " << i << std::endl;
                 ChannelTriggerMode[i] = CAEN_DGTZ_TRGMODE_DISABLED;
                 break;
@@ -45,23 +43,23 @@ void Digitizer::Program(Dconfig &conf)
                 EnabledMask += (1 << i);
                 std::cout << "Enable channel " << i << " in acquisition mode" << std::endl;
                 ChannelTriggerMode[i] = CAEN_DGTZ_TRGMODE_DISABLED;
-                Execute(CAEN_DGTZ_SetChannelDCOffset(runparameters.handle, i, conf.dcoffset_db[i]));
+                Execute(CAEN_DGTZ_SetChannelDCOffset(runparameters_.handle, i, dconfig_.dcoffset_db[i]));
                 break;
             case 2:
                 EnabledMask += (1 << i);
                 std::cout << "Enable channel " << i << " in trigger mode" << std::endl;
                 ChannelTriggerMode[i] = CAEN_DGTZ_TRGMODE_ACQ_AND_EXTOUT;
-                Execute(CAEN_DGTZ_SetChannelDCOffset(runparameters.handle, i, conf.dcoffset_db[i]));
-                Execute(CAEN_DGTZ_SetChannelTriggerThreshold(runparameters.handle, i, conf.thresh_db[i]));//for dpp is limited to ~7000
-                if (conf.trigpol_db[i] > 0)
+                Execute(CAEN_DGTZ_SetChannelDCOffset(runparameters_.handle, i, dconfig_.dcoffset_db[i]));
+                Execute(CAEN_DGTZ_SetChannelTriggerThreshold(runparameters_.handle, i, dconfig_.thresh_db[i]));//for dpp is limited to ~7000
+                if (dconfig_.trigpol_db[i] > 0)
                 {
-                    Execute(CAEN_DGTZ_SetTriggerPolarity(runparameters.handle, i, CAEN_DGTZ_TriggerOnRisingEdge));
-                    Execute(CAEN_DGTZ_SetChannelPulsePolarity(runparameters.handle, i, CAEN_DGTZ_PulsePolarityPositive));
+                    Execute(CAEN_DGTZ_SetTriggerPolarity(runparameters_.handle, i, CAEN_DGTZ_TriggerOnRisingEdge));
+                    Execute(CAEN_DGTZ_SetChannelPulsePolarity(runparameters_.handle, i, CAEN_DGTZ_PulsePolarityPositive));
                 }
                 else
                 {
-                    Execute(CAEN_DGTZ_SetTriggerPolarity(runparameters.handle, i, CAEN_DGTZ_TriggerOnFallingEdge));
-                    Execute(CAEN_DGTZ_SetChannelPulsePolarity(runparameters.handle, i, CAEN_DGTZ_PulsePolarityNegative));
+                    Execute(CAEN_DGTZ_SetTriggerPolarity(runparameters_.handle, i, CAEN_DGTZ_TriggerOnFallingEdge));
+                    Execute(CAEN_DGTZ_SetChannelPulsePolarity(runparameters_.handle, i, CAEN_DGTZ_PulsePolarityNegative));
                 }
                 break;
         }
@@ -69,9 +67,9 @@ void Digitizer::Program(Dconfig &conf)
 
     std::bitset<8> mask(EnabledMask);
     std::cout << "Enabled Channel Mask is "<< mask << std::endl;
-    Execute(CAEN_DGTZ_SetChannelEnableMask(runparameters.handle, EnabledMask));
+    Execute(CAEN_DGTZ_SetChannelEnableMask(runparameters_.handle, EnabledMask));
 
-    if (conf.TrigType) AndTriggger(conf);
+    if (dconfig_.TrigType) AndTriggger(dconfig_);
     else OrTriggger();	
         
     std::cout << "Programming finished!" << std::endl;
@@ -81,7 +79,7 @@ void Digitizer::Program(Dconfig &conf)
 
 Digitizer::~Digitizer()
 {
-    Execute(CAEN_DGTZ_CloseDigitizer(runparameters.handle));
+    Execute(CAEN_DGTZ_CloseDigitizer(runparameters_.handle));
 }
 
 CAEN_DGTZ_ErrorCode Digitizer::Execute(CAEN_DGTZ_ErrorCode ret)
@@ -94,13 +92,13 @@ CAEN_DGTZ_ErrorCode Digitizer::Execute(CAEN_DGTZ_ErrorCode ret)
     return ret;
 }
 
-void Digitizer::AndTriggger(Dconfig &conf)
+void Digitizer::AndTriggger(Dconfig &dconfig_)
 {
     int coincidenceEnableMask = 0;
 
     uint32_t triggerLogicBaseAddress = 0x1084;
 
-    for (int i = 0; i < dconfig.NumChannels; i = i + 2)
+    for (int i = 0; i < dconfig_.NumChannels; i = i + 2)
     {
         if (ChannelTriggerMode[i] != CAEN_DGTZ_TRGMODE_DISABLED)
         {
@@ -115,10 +113,10 @@ void Digitizer::AndTriggger(Dconfig &conf)
     }
     
     std::bitset<8> coincidenceBitset(coincidenceEnableMask);
-    uint32_t MajLvl = coincidenceBitset.count() - 1 - conf.MajorityLevel*((conf.MajorityLevel + 1) < NTrigChannels);
-    std::cout << "Coincidence Enable Mask = " << coincidenceEnableMask << "  MajorityLevel = " << MajLvl <<"  Coincidence Window = "<< conf.CoincidenceWindow << std::endl;
+    uint32_t MajLvl = coincidenceBitset.count() - 1 - dconfig_.MajorityLevel*((dconfig_.MajorityLevel + 1) < NTrigChannels);
+    std::cout << "Coincidence Enable Mask = " << coincidenceEnableMask << "  MajorityLevel = " << MajLvl <<"  Coincidence Window = "<< dconfig_.CoincidenceWindow << std::endl;
 
-    uint32_t message = coincidenceEnableMask + (MajLvl << 24) + (conf.CoincidenceWindow << 20);
+    uint32_t message = coincidenceEnableMask + (MajLvl << 24) + (dconfig_.CoincidenceWindow << 20);
     uint32_t coincAddress = 0x810C;
     uint32_t mask = 0xFFFFFFFF;    
     WriteRegisterBitmask(coincAddress, message, mask);
@@ -132,7 +130,7 @@ void Digitizer::OrTriggger()
 
     std::cout << "Next channels included in or-logic: ";
   
-    for (int i = 0; i < dconfig.NumChannels; i = i + 2)
+    for (int i = 0; i < dconfig_.NumChannels; i = i + 2)
     {
         if (ChannelTriggerMode[i] != CAEN_DGTZ_TRGMODE_DISABLED)
         {
@@ -149,7 +147,7 @@ void Digitizer::OrTriggger()
             std::cout << i + 1 << " ";
         }
         pair_chmask &= EnabledMask;
-        Execute(CAEN_DGTZ_SetChannelSelfTrigger(runparameters.handle, mode, pair_chmask));
+        Execute(CAEN_DGTZ_SetChannelSelfTrigger(runparameters_.handle, mode, pair_chmask));
     }
     std::cout << std::endl;
 }
@@ -157,48 +155,46 @@ void Digitizer::OrTriggger()
 void Digitizer::WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask)
 {
     uint32_t d32 = 0xFFFFFFFF;
-    Execute(CAEN_DGTZ_ReadRegister(runparameters.handle, address, &d32));
+    Execute(CAEN_DGTZ_ReadRegister(runparameters_.handle, address, &d32));
     data &= mask;
     d32 &= ~mask;
     d32 |= data;
-    Execute(CAEN_DGTZ_WriteRegister(runparameters.handle, address, d32));
+    Execute(CAEN_DGTZ_WriteRegister(runparameters_.handle, address, d32));
 }
 
-DigiData &Digitizer::ReadEvent()
-{
-     // printf("read\n");
-    
+RunParameters Digitizer::ReadEvent(DigiData &digidata)
+{    
     uint32_t NEvents = 0;
     uint32_t lstatus;
     uint32_t ElapsedTime, CurrentTime;
     CAEN_DGTZ_ErrorCode ret;
 
-    Execute(CAEN_DGTZ_ReadData(runparameters.handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &BufferSize));
+    Execute(CAEN_DGTZ_ReadData(runparameters_.handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &BufferSize));
 
-    if (BufferSize != 0) {ret = Execute(CAEN_DGTZ_GetNumEvents(runparameters.handle, buffer, BufferSize, &NEvents));}
-    else {ret = Execute(CAEN_DGTZ_ReadRegister(runparameters.handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus));}
+    if (BufferSize != 0) {ret = Execute(CAEN_DGTZ_GetNumEvents(runparameters_.handle, buffer, BufferSize, &NEvents));}
+    else {ret = Execute(CAEN_DGTZ_ReadRegister(runparameters_.handle, CAEN_DGTZ_ACQ_STATUS_ADD, &lstatus));}
 	  // if (lstatus & (0x1 << 19)) {
 	  //   exit(0);}
     
-    runparameters.Nbytes += BufferSize;
-    runparameters.Nevs += NEvents;
-    runparameters.nevent += NEvents;
+    runparameters_.Nbytes += BufferSize;
+    runparameters_.Nevs += NEvents;
+    runparameters_.nevent += NEvents;
     CurrentTime = GetCurrentTime();
-    ElapsedTime = CurrentTime - runparameters.PrevRateTime;
-    runparameters.nCycles++;
+    ElapsedTime = CurrentTime - runparameters_.PrevRateTime;
+    runparameters_.nCycles++;
 
     if (ElapsedTime > 1000)
     {
-        if (runparameters.Nbytes == 0)
+        if (runparameters_.Nbytes == 0)
         {
 	        if (ret == CAEN_DGTZ_Timeout) std::cout << "Timeout...\n" << std::endl;
             else printf("No data...\n");
         }
-        else printf("Reading at %.2f MB/s (Trg Rate: %.2f Hz, %d events)\n", (float)runparameters.Nbytes/((float)ElapsedTime*1048.576f), (float)runparameters.Nevs*1000.0f/(float)ElapsedTime, runparameters.nevent);
-        runparameters.nCycles= 0;
-        runparameters.Nbytes = 0;
-        runparameters.Nevs = 0;
-        runparameters.PrevRateTime = CurrentTime;
+        else printf("Reading at %.2f MB/s (Trg Rate: %.2f Hz, %d events)\n", (float)runparameters_.Nbytes/((float)ElapsedTime*1048.576f), (float)runparameters_.Nevs*1000.0f/(float)ElapsedTime, runparameters_.nevent);
+        runparameters_.nCycles= 0;
+        runparameters_.Nbytes = 0;
+        runparameters_.Nevs = 0;
+        runparameters_.PrevRateTime = CurrentTime;
     }	
 
     /* Analyze data */
@@ -206,13 +202,15 @@ DigiData &Digitizer::ReadEvent()
     for(int j = 0; j < (int)NEvents; j++) 
     {
       /* Get one event from the readout buffer */
-      Execute(CAEN_DGTZ_GetEventInfo(runparameters.handle, buffer, BufferSize, j, &digidata.EventInfo, &EventPtr));
+      Execute(CAEN_DGTZ_GetEventInfo(runparameters_.handle, buffer, BufferSize, j, &digidata_.EventInfo, &EventPtr));
 
       /* decode the event */
-      Execute(CAEN_DGTZ_DecodeEvent(runparameters.handle, EventPtr, (void**)&digidata.Data));
+      Execute(CAEN_DGTZ_DecodeEvent(runparameters_.handle, EventPtr, (void**)&digidata_.Data));
 
     }
-    return digidata;
+
+    digidata = digidata_;
+    return runparameters_;
 }
 
 void Digitizer::AllocateEvents()
@@ -220,9 +218,19 @@ void Digitizer::AllocateEvents()
   buffer = NULL;
   EventPtr = NULL;
   
-  digidata.Data = NULL; /* generic event struct with 16 bit data (10, 12, 14 and 16 bit digitizers */
-  Execute(CAEN_DGTZ_AllocateEvent(runparameters.handle, (void**)&digidata.Data));
-  Execute(CAEN_DGTZ_MallocReadoutBuffer(runparameters.handle, &buffer, &AllocatedSize)); /* WARNING: This malloc must be done after the digitizer programming */
+  digidata_.Data = NULL; /* generic event struct with 16 bit data (10, 12, 14 and 16 bit digitizers */
+  Execute(CAEN_DGTZ_AllocateEvent(runparameters_.handle, (void**)&digidata_.Data));
+  Execute(CAEN_DGTZ_MallocReadoutBuffer(runparameters_.handle, &buffer, &AllocatedSize)); /* WARNING: This malloc must be done after the digitizer programming */
   printf("Buffer for events is allocated\n");
 
+}
+
+void Digitizer::StartAquisition()
+{
+    Execute(CAEN_DGTZ_SWStartAcquisition(runparameters_.handle));
+}
+
+void Digitizer::StopAquisition()
+{
+    Execute(CAEN_DGTZ_SWStopAcquisition(runparameters_.handle));
 }

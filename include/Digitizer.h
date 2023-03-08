@@ -12,31 +12,33 @@ public:
     ~Digitizer();
     // CAEN_DGTZ_ErrorCode GetRet() {return ret;}
     CAEN_DGTZ_ErrorCode Execute(CAEN_DGTZ_ErrorCode ret);
-	void Program(Dconfig &conf);//
-	DigiData &ReadEvent();
+	void Program();//
+	RunParameters ReadEvent(DigiData &digidata);
 
 	uint16_t GetEnabledMask() {return EnabledMask;}
 	void SetEnabledMask(uint16_t enmask) {EnabledMask = enmask;}
 	
-	void SetDconfig(Dconfig dconfig) {this->dconfig = dconfig;}
-	void SetRunParameters(RunParameters &runparameters) {this->runparameters = runparameters;}
-	// RunParameters &GetRunParameters() {return runparameters;}
+	void SetDconfig(Dconfig dconfig) {dconfig_ = dconfig;}
+	void SetRunParameters(RunParameters &runparameters, Dconfig dconfig) {runparameters_ = runparameters; dconfig_ = dconfig;}
+	RunParameters GetRunParameters() {return runparameters_;}
 	// friend void intHandler(int dummy);
 	void AllocateEvents();
+	void StartAquisition();
+	void StopAquisition();
 
-	int GetRunStatus() {return runparameters.nevent;}
+	int GetRunStatus() {return runparameters_.nevent;}
 
 	// friend long GetCurrentTime();
 protected:
 	void AndTriggger(Dconfig &conf);//
 	void OrTriggger();//
-	void WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);private:
+	void WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);
+	
 	// void SetVerbose(bool verbose) {Verbose = verbose;}
 private:
-	Dconfig dconfig;
-	Rconfig rconfig;
-	RunParameters runparameters;
-	DigiData digidata;
+	Dconfig dconfig_;
+	RunParameters runparameters_;
+	DigiData digidata_;
     // CAEN_DGTZ_ErrorCode ret;
 	char *buffer = nullptr;
 	char *EventPtr = nullptr;
