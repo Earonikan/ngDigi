@@ -22,12 +22,12 @@ RunManager::RunManager(std::string cfgfilename)
     dconfig_.EventAggregation = config.read<int>("event_aggreagation");
     // dconfig.test = config.read<float>("test");
 
-    RunManager::ReadParameters2Vect(config.read<string>("chtype").data(), dconfig_.chtype_db);
-    RunManager::ReadParameters2Vect(config.read<string>("thresh").data(), dconfig_.thresh_db);
-    RunManager::ReadParameters2Vect(config.read<string>("dcoffset").data(), dconfig_.dcoffset_db);
-    RunManager::ReadParameters2Vect(config.read<string>("intsig").data(), aconfig_.intsig_db);
+    ReadParameters2Vect(config.read<string>("chtype").data(), dconfig_.chtype_db);
+    ReadParameters2Vect(config.read<string>("thresh").data(), dconfig_.thresh_db);
+    ReadParameters2Vect(config.read<string>("dcoffset").data(), dconfig_.dcoffset_db);
+    ReadParameters2Vect(config.read<string>("intsig").data(), aconfig_.intsig_db);
     for (auto i : aconfig_.intsig_db) aconfig_.intbl_db.push_back(i-aconfig_.WindowWidth);
-    RunManager::ReadParameters2Vect(config.read<string>("polarity").data(), dconfig_.trigpol_db);
+    ReadParameters2Vect(config.read<string>("polarity").data(), dconfig_.trigpol_db);
 
     // RunManager::ReadParameters2Vect(config.read<string>("test").data(), dconfig.test_db);
     // for (auto i : dconfig.chtype_db) std::cout << i << std::endl;
@@ -36,17 +36,24 @@ RunManager::RunManager(std::string cfgfilename)
 RunManager::~RunManager()
 {
     delete digitizer;
+    delete datamanager;
     delete server;
 }
 
 void RunManager::Configure()
 {
-    this->server = new Server();
-    this->digitizer = new Digitizer();
+    server = new Server();
+    digitizer = new Digitizer();
+    datamanager = new DataManager();
 
-    runparameters_.run_status = 1;
-    runparameters_.NeedToProgram = 1;
     runparameters_.nevent = 0;
+    runparameters_.Nbytes = 0;
+    runparameters_.Nevs = 0;
+    runparameters_.nCycles = 0;
+    runparameters_.handle = digitizer->GetHandle();
+    runparameters_.run_status = 1;
+    runparameters_.PrevRateTime = GetCurrentTime();
+    runparameters_.NeedToProgram = 1;
 }
 
 void RunManager::Run()
@@ -56,9 +63,8 @@ void RunManager::Run()
         gSystem->ProcessEvents();
         server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
         digitizer->SetRunParameters(runparameters_, dconfig_);
+        datamanager->Update(aconfig_);
 
-        // std::cout << digitizer->GetRunStatus() << std::endl;
-        
         if (runparameters_.NeedToProgram == 1)
         {
             digitizer->Program();
@@ -69,18 +75,16 @@ void RunManager::Run()
         {
             digitizer->SetRunParameters(runparameters_, dconfig_);
             runparameters_ = digitizer->ReadEvent(digidata_);
+            datamanager->AnalyzeData(digidata_);
             server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
-            
-            // std::cout << runparameters_.nevent << " " << digitizer->GetRunStatus() << std::endl;
+
             if ((rconfig_.Nevents != 0) && (runparameters_.nevent > rconfig_.Nevents)) 
             {
                 cmdStop();
                 std::cout << "Events completed" << std::endl;
             }
-            // std::cout << runparameters.PrevRateTime << "  " << rconfig.StartTime << std::endl;
             if ((rconfig_.Actime != 0) && ((runparameters_.PrevRateTime-rconfig_.StartTime) > rconfig_.Actime*1000))
             {
-                // std::cout << runparameters_.PrevRateTime << "  " << rconfig_.StartTime << std::endl;
                 cmdStop();
                 std::cout << "Time elapsed" << std::endl;
             }
@@ -137,9 +141,20 @@ void RunManager::SetVecParameter(int arg1, int arg2, const char *ch)
     server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 }
 
+void RunManager::SetCharParameters(const char *arg1, const char *ch)
+{
+    if (strcmp("chtype", ch) == 0)
+    {
+        dconfig_.chtype_db.clear();
+        ReadParameters2Vect(arg1, dconfig_.chtype_db);
+    }
+    server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+}
+
 template <typename T>
 void RunManager::ReadParameters2Vect(std::string str, std::vector<T> &parameter)
 {
+    // std::cout << parameter.size() << std::endl;
     str +=",";
     std::string num;
     for (auto i = 0; i < int(str.length()); i++)
@@ -153,14 +168,17 @@ void RunManager::ReadParameters2Vect(std::string str, std::vector<T> &parameter)
         }
     }
     dconfig_.NumChannels = parameter.size();
+    // std::cout << dconfig_.NumChannels << std::endl;
 }
 
 void RunManager::StartRun()
 {
     SetParameter(2, "run_status");
     SetParameter(1, "need_to_program");
-    SetParameter(GetCurrentTime(), "start_time");
-    SetParameter(rconfig_.StartTime, "prev_rate_time");
+    rconfig_.StartTime = GetCurrentTime();
+    runparameters_.PrevRateTime = rconfig_.StartTime;
+    // SetParameter(GetCurrentTime(), "start_time");
+    // SetParameter(rconfig_.StartTime, "prev_rate_time");
     SetParameter(0, "Nbytes");
     SetParameter(0, "Nevs");
     SetParameter(0, "nCycles");

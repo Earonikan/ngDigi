@@ -27,7 +27,7 @@ public:
 	void StopAquisition();
 
 	int GetRunStatus() {return runparameters_.nevent;}
-
+	int GetHandle() {return runparameters_.handle;}
 	// friend long GetCurrentTime();
 protected:
 	void AndTriggger(Dconfig &conf);//

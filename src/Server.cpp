@@ -12,6 +12,7 @@ Server::Server()
     gInterpreter->Declare("void cmdStop();");
     gInterpreter->Declare("void ChangeParameterOne(int arg1, const char *ch);");
     gInterpreter->Declare("void ChangeParameterTwo(int arg1, int arg2, const char *ch);");
+    gInterpreter->Declare("void ChangeParameterChar(const char *arg1, const char *ch);");
 
     // gInterpreter->Declare("int programdigitizer();");
     // gInterpreter->Declare("void resethistos();");
@@ -30,8 +31,10 @@ Server::Server()
     serv->RegisterCommand("/commands/Change_dcoffset", "ChangeParameterTwo(%arg1%,%arg2%,\"dcoff\");", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/Change_window", "ChangeParameterTwo(%arg1%,%arg2%,\"change_window\")", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/Change_integration_width", "ChangeParameterOne(%arg1%,\"charge_width\");", "rootsys/icons/right_arrow_cursor.png");
-    serv->RegisterCommand("/commands/Change_integration_starting_point", "ChangeParameterTwo(%arg1%,%arg2%,\"charge_start\");", "rootsys/icons/right_arrow_cursor.png");
+    serv->RegisterCommand("/commands/Change_integration_starting_point", "ChangeParameterTwo(%arg1%,%arg2%,\"change_start\");", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/Change_Vpp", "ChangeParameterOne(%arg1%,\"vpp\");", "rootsys/icons/right_arrow_cursor.png");
+
+    serv->RegisterCommand("/commands/Change_ChType", "ChangeParameterChar(\"%arg1%\",\"chtype\");", "rootsys/icons/right_arrow_cursor.png");
 
     // serv->RegisterCommand("/commands/Program_digitizer", "programdigitizer();", "rootsys/icons/ed_interrupt.png");
     // serv->RegisterCommand("/commands/Reset_histos", "resethistos();", "rootsys/icons/ed_interrupt.png");
@@ -75,6 +78,11 @@ void ChangeParameterOne(int arg1, const char *ch)
 void ChangeParameterTwo(int arg1, int arg2, const char *ch)
 {
     GlobalWrapper<RunManager>::GetInstance().Getter()->SetVecParameter(arg1, arg2, ch);
+}
+
+void ChangeParameterChar(const char *arg1, const char *ch)
+{
+    GlobalWrapper<RunManager>::GetInstance().Getter()->SetCharParameters(arg1, ch);
 }
 
 void cmdStart()
@@ -139,8 +147,6 @@ void Server::UpdateParametersField(RunParameters runparameters, Dconfig dconfig,
     {
         sprintf(temp_char, "Channel %d threshold = %d\n", i, dconfig_.thresh_db[i]);
         temp_string += temp_char;
-        
-        // std::cout << "HERE" << std::endl;
     }
     sprintf(temp_char, "\n");
     for (int i = 0; i < dconfig_.NumChannels; i++) if (dconfig_.chtype_db[i] > 0)
@@ -152,7 +158,7 @@ void Server::UpdateParametersField(RunParameters runparameters, Dconfig dconfig,
     temp_string += temp_char;
     for (int i = 0; i < dconfig_.NumChannels; i++) if (dconfig_.chtype_db[i] > 0)
     {
-        sprintf(temp_char, "Channel %d trigger window = (%d, %d)\n", i, aconfig_.intsig_db[i], aconfig_.intbl_db[i] - aconfig_.WindowWidth);
+        sprintf(temp_char, "Channel %d window = (%d, %d)\n", i, aconfig_.intsig_db[i], aconfig_.intbl_db[i] - aconfig_.WindowWidth);
         temp_string += temp_char;
     }
     sprintf (temp_char,"Charge Histos Range = (%d, %d)\n", aconfig_.rmin, aconfig_.rmax);

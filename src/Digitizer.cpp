@@ -166,7 +166,7 @@ RunParameters Digitizer::ReadEvent(DigiData &digidata)
 {    
     uint32_t NEvents = 0;
     uint32_t lstatus;
-    uint32_t ElapsedTime, CurrentTime;
+    long ElapsedTime, CurrentTime;
     CAEN_DGTZ_ErrorCode ret;
 
     Execute(CAEN_DGTZ_ReadData(runparameters_.handle, CAEN_DGTZ_SLAVE_TERMINATED_READOUT_MBLT, buffer, &BufferSize));
@@ -225,12 +225,6 @@ void Digitizer::AllocateEvents()
 
 }
 
-void Digitizer::StartAquisition()
-{
-    Execute(CAEN_DGTZ_SWStartAcquisition(runparameters_.handle));
-}
+void Digitizer::StartAquisition() {Execute(CAEN_DGTZ_SWStartAcquisition(runparameters_.handle));}
 
-void Digitizer::StopAquisition()
-{
-    Execute(CAEN_DGTZ_SWStopAcquisition(runparameters_.handle));
-}
+void Digitizer::StopAquisition() {Execute(CAEN_DGTZ_SWStopAcquisition(runparameters_.handle));}

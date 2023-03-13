@@ -65,3 +65,15 @@ struct RunParameters
 
     bool NeedToProgram;
 };
+
+struct HistoCollection
+{
+    std::vector<TH1F> Ampl_signal;
+    std::vector<TH1F> Charge_signal;
+    
+    std::vector<TH1F> Ampl_baseline;
+    std::vector<TH1F> Charge_baseline;
+
+    std::vector<TH1F> Ampl_spe;
+    std::vector<TH1F> Ampl_spe;
+};

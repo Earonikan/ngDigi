@@ -5,6 +5,7 @@
 #include "Server.h"
 #include "Digitizer.h"
 #include "DataFrames.h"
+#include "DataManager.h"
 
 // class Config;
 class Digitizer;
@@ -33,6 +34,7 @@ public:
 
     void SetParameter(int arg1, const char *ch);
     void SetVecParameter(int arg1, int arg2, const char *ch);
+    void SetCharParameters(const char *arg1, const char *ch);
 
     void SetRunParameters(RunParameters runparameters) {runparameters_ = runparameters;}
     void GetDconfig(Dconfig dconfig) {dconfig_ = dconfig;}
@@ -47,6 +49,7 @@ private:
     
     Server *server;
     Digitizer *digitizer;
+    DataManager *datamanager;
 
     RunParameters runparameters_;
     Dconfig dconfig_;
