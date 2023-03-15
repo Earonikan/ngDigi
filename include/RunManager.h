@@ -5,7 +5,7 @@
 #include "Server.h"
 #include "Digitizer.h"
 #include "DataFrames.h"
-#include "DataManager.h"
+#include "AnalyzeManager.h"
 
 // class Config;
 class Digitizer;
@@ -25,6 +25,8 @@ public:
 
     void SetStatus(int status) {runparameters_.run_status = status;}
     int GetStatus() {return runparameters_.run_status;}
+
+    void PrintRateInfo();
 
     RunParameters GetRunParameters() {return runparameters_;}
     Dconfig GetDconfig() {return dconfig_;}
@@ -49,9 +51,10 @@ private:
     
     Server *server;
     Digitizer *digitizer;
-    DataManager *datamanager;
+    AnalyzeManager *analyzemanager;
 
     RunParameters runparameters_;
+    HistoCollection histocollection_;
     Dconfig dconfig_;
     Aconfig aconfig_;
     Rconfig rconfig_;

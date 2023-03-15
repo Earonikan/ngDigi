@@ -36,24 +36,23 @@ RunManager::RunManager(std::string cfgfilename)
 RunManager::~RunManager()
 {
     delete digitizer;
-    delete datamanager;
+    delete analyzemanager;
     delete server;
 }
 
 void RunManager::Configure()
 {
     server = new Server();
-    digitizer = new Digitizer();
-    datamanager = new DataManager();
+    digitizer = new Digitizer(CAEN_DGTZ_USB,0,0,0);
+    analyzemanager = new AnalyzeManager();
 
     runparameters_.nevent = 0;
     runparameters_.Nbytes = 0;
     runparameters_.Nevs = 0;
-    runparameters_.nCycles = 0;
-    runparameters_.handle = digitizer->GetHandle();
+    // runparameters_.handle = digitizer->GetHandle();
     runparameters_.run_status = 1;
     runparameters_.PrevRateTime = GetCurrentTime();
-    runparameters_.NeedToProgram = 1;
+    runparameters_.NeedToUpdate = 1;
 }
 
 void RunManager::Run()
@@ -61,22 +60,28 @@ void RunManager::Run()
     while (runparameters_.run_status)
     {
         gSystem->ProcessEvents();
-        server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
-        digitizer->SetRunParameters(runparameters_, dconfig_);
-        datamanager->Update(aconfig_);
 
-        if (runparameters_.NeedToProgram == 1)
+        if (runparameters_.NeedToUpdate == 1)
         {
-            digitizer->Program();
-            runparameters_.NeedToProgram = 0;
+            digitizer->Program(dconfig_);
+            analyzemanager->CreateHistos(aconfig_, dconfig_, digitizer->GetBoardInfo());
+            server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager->GetHistoCollection());
+            runparameters_.NeedToUpdate = 0;
         }
+
+        // digitizer->SetRunParameters(runparameters_, dconfig_);
+        // analyzemanager->CreateHistos(aconfig_, dconfig_, digitizer->GetBoardInfo());
+        // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager->GetHistoCollection());
+
 
         while (runparameters_.run_status > 1)
         {
-            digitizer->SetRunParameters(runparameters_, dconfig_);
-            runparameters_ = digitizer->ReadEvent(digidata_);
-            datamanager->AnalyzeData(digidata_);
-            server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+            // digitizer->SetRunParameters(runparameters_, dconfig_);
+            digidata_ = digitizer->ReadEvent();
+            runparameters_.nevent += digidata_.NEvents;
+            PrintRateInfo();
+            // analyzemanager->AnalyzeData(digidata_);
+            server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager->GetHistoCollection());
 
             if ((rconfig_.Nevents != 0) && (runparameters_.nevent > rconfig_.Nevents)) 
             {
@@ -91,7 +96,9 @@ void RunManager::Run()
             sleep(1);
             gSystem->ProcessEvents();
         }
+        runparameters_.nevent = 0;
     }
+    analyzemanager->DeleteHistos();
 }
 
 void RunManager::SetParameter(int arg1, const char *ch)
@@ -105,20 +112,21 @@ void RunManager::SetParameter(int arg1, const char *ch)
     if (strcmp("read_temps", ch) == 0) rconfig_.ReadTemp = arg1;
     if (strcmp("create_fit", ch) == 0) aconfig_.CreateFit = arg1;
 
-    if (strcmp("run_status", ch) == 0) runparameters_.run_status = arg1;
-    if (strcmp("need_to_program", ch) == 0) runparameters_.NeedToProgram = arg1;
-    if (strcmp("start_time", ch) == 0) rconfig_.StartTime = arg1;
-    if (strcmp("prev_rate_time", ch) == 0) runparameters_.PrevRateTime = arg1;
+    runparameters_.NeedToUpdate = 1;
 
-    if (strcmp("Nbytes", ch) == 0) runparameters_.Nbytes = arg1;
-    if (strcmp("Nevs", ch) == 0) runparameters_.Nevs = arg1;
-    if (strcmp("nCycles", ch) == 0) runparameters_.nCycles = arg1;
-    if (strcmp("nevts", ch) == 0) runparameters_.nevent = arg1;
+    // if (strcmp("run_status", ch) == 0) runparameters_.run_status = arg1;
+    // if (strcmp("need_to_update", ch) == 0) runparameters_.NeedToUpdate = arg1;
+    // if (strcmp("start_time", ch) == 0) rconfig_.StartTime = arg1;
+    // if (strcmp("prev_rate_time", ch) == 0) runparameters_.PrevRateTime = arg1;
+
+    // if (strcmp("Nbytes", ch) == 0) runparameters_.Nbytes = arg1;
+    // if (strcmp("Nevs", ch) == 0) runparameters_.Nevs = arg1;
+    // if (strcmp("nevts", ch) == 0) runparameters_.nevent = arg1;
 
     // if (strcmp("Nbytes", ch) == 0) runparameters_.Nbytes = arg1;
     // if (strcmp("Nbytes", ch) == 0) runparameters_.Nbytes = arg1;
 
-    server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+    // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, histocollection_);
 }
 
 void RunManager::SetVecParameter(int arg1, int arg2, const char *ch)
@@ -138,7 +146,8 @@ void RunManager::SetVecParameter(int arg1, int arg2, const char *ch)
         aconfig_.intsig_db[arg1] = arg2;
         aconfig_.intbl_db[arg1] = aconfig_.intsig_db[arg1] - aconfig_.WindowWidth;
     }
-    server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+    runparameters_.NeedToUpdate = 1;
+    // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 }
 
 void RunManager::SetCharParameters(const char *arg1, const char *ch)
@@ -148,7 +157,8 @@ void RunManager::SetCharParameters(const char *arg1, const char *ch)
         dconfig_.chtype_db.clear();
         ReadParameters2Vect(arg1, dconfig_.chtype_db);
     }
-    server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+    runparameters_.NeedToUpdate = 1;
+    // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 }
 
 template <typename T>
@@ -173,18 +183,23 @@ void RunManager::ReadParameters2Vect(std::string str, std::vector<T> &parameter)
 
 void RunManager::StartRun()
 {
-    SetParameter(2, "run_status");
-    SetParameter(1, "need_to_program");
-    rconfig_.StartTime = GetCurrentTime();
-    runparameters_.PrevRateTime = rconfig_.StartTime;
+    // SetParameter(2, "run_status");
+    // SetParameter(1, "need_to_update");
     // SetParameter(GetCurrentTime(), "start_time");
     // SetParameter(rconfig_.StartTime, "prev_rate_time");
-    SetParameter(0, "Nbytes");
-    SetParameter(0, "Nevs");
-    SetParameter(0, "nCycles");
-    SetParameter(0, "nevts");
+    // SetParameter(0, "Nbytes");
+    // SetParameter(0, "Nevs");
+    // SetParameter(0, "nevts");
 
-    server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+    runparameters_.run_status = 2;
+    runparameters_.NeedToUpdate = 1;
+    rconfig_.StartTime = GetCurrentTime();
+    runparameters_.PrevRateTime = rconfig_.StartTime;
+    runparameters_.Nbytes = 0;
+    runparameters_.Nevs = 0;
+    runparameters_.nevent = 0;
+
+    // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
     // SetParameter(0, "create_fit");
 
     // resethistos(); //HISTOS
@@ -202,14 +217,19 @@ void RunManager::StartRun()
 
 void RunManager::StopRun()
 {
-    SetParameter(1, "run_status");
-    SetParameter(0, "need_to_program");
-    SetParameter(0, "Nbytes");
-    SetParameter(0, "Nevs");
-    SetParameter(0, "nCycles");
-    SetParameter(0, "nevts");
+    // SetParameter(1, "run_status");
+    // SetParameter(0, "need_to_update");
+    // SetParameter(0, "Nbytes");
+    // SetParameter(0, "Nevs");
+    // SetParameter(0, "nevts");
 
-    server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
+    runparameters_.run_status = 1;
+    runparameters_.NeedToUpdate = 0;
+    runparameters_.Nbytes = 0;
+    runparameters_.Nevs = 0;
+    runparameters_.nevent = 0;
+
+    // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 
     digitizer->StopAquisition();
         // serv->SetItemField("/Status", "value", "Stop");
@@ -227,3 +247,26 @@ void RunManager::StopRun()
 //     std::cout << "Wrong number of channel, it returned zero channel instead" << std::endl;
 //     return vec[0];
 // }
+
+void RunManager::PrintRateInfo()
+{
+    long ElapsedTime, CurrentTime;
+    runparameters_.Nbytes += digidata_.BufferSize;
+    runparameters_.Nevs += digidata_.NEvents;
+    // runparameters_.nevent += digidata_.NEvents;
+    CurrentTime = GetCurrentTime();
+    ElapsedTime = CurrentTime - runparameters_.PrevRateTime;
+
+    if (ElapsedTime > 1000)
+    {
+        if (runparameters_.Nbytes == 0)
+        {
+	        if (digidata_.ret == CAEN_DGTZ_Timeout) std::cout << "Timeout...\n" << std::endl;
+            else printf("No data...\n");
+        }
+        else printf("Reading at %.2f MB/s (Trg Rate: %.2f Hz, %d events)\n", (float)runparameters_.Nbytes/((float)ElapsedTime*1048.576f), (float)runparameters_.Nevs*1000.0f/(float)ElapsedTime, runparameters_.nevent);
+        runparameters_.Nbytes = 0;
+        runparameters_.Nevs = 0;
+        runparameters_.PrevRateTime = CurrentTime;
+    }
+}

@@ -8,45 +8,46 @@
 class Digitizer
 {
 public:
-    Digitizer();
+    Digitizer(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNode, uint32_t VMEBaseAddress);
     ~Digitizer();
     // CAEN_DGTZ_ErrorCode GetRet() {return ret;}
     CAEN_DGTZ_ErrorCode Execute(CAEN_DGTZ_ErrorCode ret);
-	void Program();//
-	RunParameters ReadEvent(DigiData &digidata);
+	void Program(Dconfig dconfig);//
+	DigiData ReadEvent();
 
-	uint16_t GetEnabledMask() {return EnabledMask;}
-	void SetEnabledMask(uint16_t enmask) {EnabledMask = enmask;}
+	// uint16_t GetEnabledMask() {return EnabledMask;}
+	// void SetEnabledMask(uint16_t enmask) {EnabledMask = enmask;}
 	
-	void SetDconfig(Dconfig dconfig) {dconfig_ = dconfig;}
-	void SetRunParameters(RunParameters &runparameters, Dconfig dconfig) {runparameters_ = runparameters; dconfig_ = dconfig;}
-	RunParameters GetRunParameters() {return runparameters_;}
-	// friend void intHandler(int dummy);
+	// void SetDconfig(Dconfig dconfig) {dconfig_ = dconfig;}
+	// void SetRunParameters(RunParameters &runparameters, Dconfig dconfig) {runparameters_ = runparameters; dconfig_ = dconfig;}
+	// RunParameters GetRunParameters() {return runparameters_;}
+	
+	CAEN_DGTZ_BoardInfo_t GetBoardInfo() {return BoardInfo;}
+	
 	void AllocateEvents();
 	void StartAquisition();
 	void StopAquisition();
 
-	int GetRunStatus() {return runparameters_.nevent;}
-	int GetHandle() {return runparameters_.handle;}
+	// int GetRunStatus() {return runparameters_.nevent;}
+	int GetHandle() {return handle;}
 	// friend long GetCurrentTime();
 protected:
-	void AndTriggger(Dconfig &conf);//
-	void OrTriggger();//
+	void AndTriggger(Dconfig dconfig);//
+	void OrTriggger(Dconfig dconfig);//
 	void WriteRegisterBitmask(uint32_t address, uint32_t data, uint32_t mask);
 	
 	// void SetVerbose(bool verbose) {Verbose = verbose;}
 private:
-	Dconfig dconfig_;
-	RunParameters runparameters_;
-	DigiData digidata_;
+	// Dconfig dconfig_;
+	// DigiData digidata_;
     // CAEN_DGTZ_ErrorCode ret;
 	char *buffer = nullptr;
 	char *EventPtr = nullptr;
 	uint32_t BufferSize;
 	uint32_t AllocatedSize;
     CAEN_DGTZ_BoardInfo_t BoardInfo;
-    int MajorNumber;
-	// bool Verbose;
+    // int MajorNumber;
+	int handle;
 	// long CurrentTime;
 	uint16_t EnabledMask = 0;
 	uint32_t NTrigChannels = 0;

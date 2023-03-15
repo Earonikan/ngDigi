@@ -15,7 +15,8 @@ CAEN_DGTZ_ErrorCode CAEN_DGTZ_CloseDigitizer(int handle)
 
 CAEN_DGTZ_ErrorCode CAEN_DGTZ_GetInfo(int handle, CAEN_DGTZ_BoardInfo_t *BoardInfo)
 {    
-    strcpy(BoardInfo->ModelName, "fake digi");
+    strcpy(BoardInfo->ModelName, "DT5720");
+    //strcpy(BoardInfo->ModelName, "DT5730");
     BoardInfo->Model = 8888;
     BoardInfo->Channels = 8;
     BoardInfo->FormFactor = 0;

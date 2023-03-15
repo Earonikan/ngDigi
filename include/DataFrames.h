@@ -38,8 +38,11 @@ struct Aconfig
 
 struct DigiData
 {
-    CAEN_DGTZ_UINT16_EVENT_t *Data;
+    CAEN_DGTZ_UINT16_EVENT_t *Event16;
     CAEN_DGTZ_EventInfo_t EventInfo;
+    CAEN_DGTZ_ErrorCode ret;
+    uint32_t BufferSize;
+    uint32_t NEvents;
 };
 
 struct Rconfig
@@ -58,22 +61,36 @@ struct RunParameters
 	int Nevs;
 	int nCycles;
     int nevent;
-    int handle;
+    // int handle;
     int run_status; //0 - finished, 1 - standby, 2 - running
     
 	long PrevRateTime;
 
-    bool NeedToProgram;
+    bool NeedToUpdate;
 };
 
 struct HistoCollection
 {
-    std::vector<TH1F> Ampl_signal;
-    std::vector<TH1F> Charge_signal;
-    
-    std::vector<TH1F> Ampl_baseline;
-    std::vector<TH1F> Charge_baseline;
+    std::vector<int> trigger_ch;
+    std::vector<int> signal_ch;
 
-    std::vector<TH1F> Ampl_spe;
-    std::vector<TH1F> Ampl_spe;
+    std::map<int, TH1F*> Wfm_trigger;
+    std::map<int, TH1F*> Wfm_signal_1;
+    // std::map<int, TH1F*> Wfm_signal_2;
+
+    // std::map<int, TH1F*> Ampl_signal_1;
+    // std::map<int, TH1F*> Charge_signal_1;
+
+    // std::map<int, TH1F*> Ampl_signal_2;
+    // std::map<int, TH1F*> Charge_signal_2;
+    
+    // std::map<int, TH1F*> Ampl_signal_bsl;
+    // std::map<int, TH1F*> Charge_signal_bsl;
+
+    // std::map<int, TH1F*> Ampl_trigger;
+    // std::map<int, TH1F*> Charge_trigger;
+
+    // std::map<int, TH1F*> Ampl_trigger_bsl;
+    // std::map<int, TH1F*> Charge_trigger_bsl;
+
 };

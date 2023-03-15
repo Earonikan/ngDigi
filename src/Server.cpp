@@ -33,10 +33,8 @@ Server::Server()
     serv->RegisterCommand("/commands/Change_integration_width", "ChangeParameterOne(%arg1%,\"charge_width\");", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/Change_integration_starting_point", "ChangeParameterTwo(%arg1%,%arg2%,\"change_start\");", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/Change_Vpp", "ChangeParameterOne(%arg1%,\"vpp\");", "rootsys/icons/right_arrow_cursor.png");
-
     serv->RegisterCommand("/commands/Change_ChType", "ChangeParameterChar(\"%arg1%\",\"chtype\");", "rootsys/icons/right_arrow_cursor.png");
 
-    // serv->RegisterCommand("/commands/Program_digitizer", "programdigitizer();", "rootsys/icons/ed_interrupt.png");
     // serv->RegisterCommand("/commands/Reset_histos", "resethistos();", "rootsys/icons/ed_interrupt.png");
     // serv->RegisterCommand("/commands/Fit_histos", "fithistos();", "rootsys/icons/ed_interrupt.png");
     // serv->RegisterCommand("/commands/Save2file", "savefile(\"%arg1%\");", "button;rootsys/icons/bld_save.png");
@@ -56,9 +54,10 @@ Server::Server()
 
     serv->SetItemField("/", "_layout", "vert2222_8441");
     serv->SetItemField("/","_monitoring","10");
-    //sprintf(sname,"[trigger_ch%d/common_spectr_%d,trigger_ch%d/common_spectr_%d,trigger_ch%d/pave_%d,trigger_ch%d/pave_%d,Parameters,trigger_ch%d/bl_spectr_%dtrigger_ch%d/signalwf_%d+trigger_ch%d/TBox,trigger_ch%d/signalwf_%d+trigger_ch%d/TBox]",chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[0],chtr[1],chtr[1],chtr[1]);
+
+    // sprintf(sname,"[trigger_ch%d/common_spectr_%d,trigger_ch%d/common_spectr_%d,trigger_ch%d/pave_%d,trigger_ch%d/pave_%d,Parameters,trigger_ch%d/bl_spectr_%dtrigger_ch%d/signalwf_%d+trigger_ch%d/TBox,trigger_ch%d/signalwf_%d+trigger_ch%d/TBox]",chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[0],chtr[1],chtr[1],chtr[1]);
     // sprintf(sname,"[trigwf_%d]",chtr[0]);
-    // char sname[1000]
+
     // sprintf(sname,"[trigger_ch%d/common_spectr_%d,trigger_ch%d/common_spectr_%d,Parameters,trigger_ch%d/bl_spectr_%d+trigger_ch%d/bl_spectr_%d+trigger_ch%d/signal_spectr_%d+trigger_ch%d/signal_spectr_%d,trigger_ch%d/signalwf_%d+trigger_ch%d/TBox,trigger_ch%d/signalwf_%d+trigger_ch%d/TBox,Status,Temperatures]",chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[0],chtr[1],chtr[1],chtr[1]);
     // printf("%s\n",sname);
     // serv->SetItemField("/","_drawitem",sname);
@@ -97,80 +96,109 @@ void cmdStop()
     std::cout << "cmdStop()" << std::endl;
 }
 
-void Server::UpdateParametersField(RunParameters runparameters, Dconfig dconfig, Aconfig aconfig, Rconfig rconfig, DigiData digidata)
+// void cmdUpdate()
+// {
+//     GlobalWrapper<RunManager>::GetInstance().Getter()->StopRun();
+//     std::cout << "cmdUpdate" << std::endl;
+// }
+
+void Server::UpdateParametersField(RunParameters runparameters, Dconfig dconfig, Aconfig aconfig, Rconfig rconfig, DigiData digidata,  HistoCollection histocollection)
 {
-    runparameters_ = runparameters;
-    dconfig_ = dconfig;
-    rconfig_ = rconfig;
-    aconfig_ = aconfig;
-    digidata_ = digidata;
+    // runparameters = runparameters;
+    // dconfig = dconfig;
+    // rconfig = rconfig;
+    // aconfig = aconfig;
+    // digidata_ = digidata;
 
     std::string temp_string;
     char temp_char[200];
 
-    if (runparameters_.run_status == 0)
+    if (runparameters.run_status == 0)
     {
         serv->SetItemField("/Status", "value", "Stop");
         serv->SetItemField("/Status", "_status", "0"); 
     }
-    if (runparameters_.run_status == 2)
+    if (runparameters.run_status == 2)
     {
-        sprintf(temp_char,"Running... \n%d / %d\n", runparameters_.nevent, rconfig_.Nevents);
+        sprintf(temp_char,"Running... \n%d / %d\n", runparameters.nevent, rconfig.Nevents);
         serv->SetItemField("/Status", "value", temp_char);
         serv->SetItemField("/Status", "_status", "1");
     }
-    if (runparameters_.run_status == 1)
+    if (runparameters.run_status == 1)
     {
-        sprintf(temp_char,"Idling... \n%d / %d\n", runparameters_.nevent, rconfig_.Nevents);
+        sprintf(temp_char,"Idling... \n%d / %d\n", runparameters.nevent, rconfig.Nevents);
         serv->SetItemField("/Status", "value", temp_char);
         serv->SetItemField("/Status", "_status", "1");
     }
     
     serv->SetItemField("/Fits", "value", "Undefined");
 
-    sprintf(temp_char, "Run will stop after %d events or %d seconds", rconfig_.Nevents, rconfig_.Actime);
+    sprintf(temp_char, "Run will stop after %d events or %d seconds", rconfig.Nevents, rconfig.Actime);
     temp_string += temp_char;
-    sprintf(temp_char, "\nNumber of samples = %d", dconfig_.Samples);
+    sprintf(temp_char, "\nNumber of samples = %d", dconfig.Samples);
     temp_string += temp_char;
-    sprintf(temp_char, "\nPostTrigger = %d ", dconfig_.PostTrigger);
+    sprintf(temp_char, "\nPostTrigger = %d ", dconfig.PostTrigger);
     temp_string += temp_char;
     sprintf(temp_char, "\nTrigger channels: ");
     temp_string += temp_char;
-    for (int i = 0; i < dconfig_.NumChannels; i++) if (dconfig_.chtype_db[i] == 2)
+    for (int i = 0; i < dconfig.NumChannels; i++) if (dconfig.chtype_db[i] == 2)
     {
         sprintf(temp_char,"%d ", i);
         temp_string += temp_char;
     }
     sprintf(temp_char, "\n");
     temp_string += temp_char;
-    for (int i = 0; i < dconfig_.NumChannels; i++) if (dconfig_.chtype_db[i] == 2)
+    for (int i = 0; i < dconfig.NumChannels; i++) if (dconfig.chtype_db[i] == 2)
     {
-        sprintf(temp_char, "Channel %d threshold = %d\n", i, dconfig_.thresh_db[i]);
+        sprintf(temp_char, "Channel %d threshold = %d\n", i, dconfig.thresh_db[i]);
         temp_string += temp_char;
     }
     sprintf(temp_char, "\n");
-    for (int i = 0; i < dconfig_.NumChannels; i++) if (dconfig_.chtype_db[i] > 0)
+    for (int i = 0; i < dconfig.NumChannels; i++) if (dconfig.chtype_db[i] > 0)
     {
-        sprintf(temp_char, "Channel %d DCoffset = %d\n", i, dconfig_.dcoffset_db[i]);
+        sprintf(temp_char, "Channel %d DCoffset = %d\n", i, dconfig.dcoffset_db[i]);
         temp_string += temp_char;
     }
-    sprintf (temp_char,"\nIntegration window width = %d\n", aconfig_.WindowWidth);
+    sprintf (temp_char,"\nIntegration window width = %d\n", aconfig.WindowWidth);
     temp_string += temp_char;
-    for (int i = 0; i < dconfig_.NumChannels; i++) if (dconfig_.chtype_db[i] > 0)
+    for (int i = 0; i < dconfig.NumChannels; i++) if (dconfig.chtype_db[i] > 0)
     {
-        sprintf(temp_char, "Channel %d window = (%d, %d)\n", i, aconfig_.intsig_db[i], aconfig_.intbl_db[i] - aconfig_.WindowWidth);
+        sprintf(temp_char, "Channel %d window = (%d, %d)\n", i, aconfig.intsig_db[i], aconfig.intbl_db[i] - aconfig.WindowWidth);
         temp_string += temp_char;
     }
-    sprintf (temp_char,"Charge Histos Range = (%d, %d)\n", aconfig_.rmin, aconfig_.rmax);
+    sprintf (temp_char,"Charge Histos Range = (%d, %d)\n", aconfig.rmin, aconfig.rmax);
     temp_string += temp_char;
-    sprintf (temp_char,"Vpp = %d\n", dconfig_.Vpp);
+    sprintf (temp_char,"Vpp = %d\n", dconfig.Vpp);
     temp_string += temp_char;
-    sprintf (temp_char,"CreateFit = %d\n", aconfig_.CreateFit);
+    sprintf (temp_char,"CreateFit = %d\n", aconfig.CreateFit);
     temp_string += temp_char;
-    sprintf (temp_char,"Read Temperatures = %d\n", rconfig_.ReadTemp);
+    sprintf (temp_char,"Read Temperatures = %d\n", rconfig.ReadTemp);
     temp_string += temp_char;
     str = temp_string.c_str();
     // str = "Hello";
     serv->SetItemField("/Parameters", "value", str);
+
+    // char sname[400];
+    // for (auto i : histocollection.trigger_ch)
+    // {
+    //     sprintf(sname, "/trigger_ch%d", i);
+    //     serv->Register(sname, histocollection.Wfm_trigger[i]);
+
+
+    //     // serv->Register(sname, hsignal[i]);
+    //     // serv->Register(sname, hacsignal[i]);
+    //     // serv->Register(sname, hcommon[i]);
+    //     // serv->Register(sname, hblspectr[i]);
+    //     // serv->Register(sname, hsigspectr[i]);
+    //     // serv->Register(sname, hsdata[i]);
+    //     // serv->Register(sname, tpoly[i]);
+    // }
+
+    // for (auto i : histocollection.signal_ch)
+    // {
+    //     sprintf(sname, "/signal_ch%d", i);
+    //     serv->Register(sname, histocollection.Wfm_signal_1[i]);
+
+    // }
     
 }

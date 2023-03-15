@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <array>
 #include <vector>
+#include <map>
 #include <bitset>
 #include <typeinfo> 
 

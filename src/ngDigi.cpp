@@ -11,7 +11,8 @@ int main(int argc, char *argv[])
 {
     // Digitizer *digitizer = new Digitizer();
     // Server *server = new Server();
-    RunManager runmanager(argv[1]);
+    // RunManager runmanager(argv[1]);
+    RunManager runmanager("dconfnew.cfg");
 
     GlobalWrapper<RunManager>::GetInstance().Setter(&runmanager);
     
