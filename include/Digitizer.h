@@ -3,13 +3,14 @@
 #include "stdafx.h"
 #include "CAENDigitizerEmu.h"
 #include "DataFrames.h"
-#include "utils.h"
 
 class Digitizer
 {
 public:
-    Digitizer(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNode, uint32_t VMEBaseAddress);
-    ~Digitizer();
+	Digitizer() {;}
+	~Digitizer();
+    void Open(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNode, uint32_t VMEBaseAddress);
+
     // CAEN_DGTZ_ErrorCode GetRet() {return ret;}
     CAEN_DGTZ_ErrorCode Execute(CAEN_DGTZ_ErrorCode ret);
 	void Program(Dconfig dconfig);//

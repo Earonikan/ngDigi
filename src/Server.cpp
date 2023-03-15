@@ -52,7 +52,7 @@ Server::Server()
     serv->CreateItem("/Temperatures","Temperatures output");
     serv->SetItemField("/Temperatures", "_kind", "Text");
 
-    serv->SetItemField("/", "_layout", "vert2222_8441");
+    serv->SetItemField("/", "_layout", "vert2222_4444");
     serv->SetItemField("/","_monitoring","10");
 
     // sprintf(sname,"[trigger_ch%d/common_spectr_%d,trigger_ch%d/common_spectr_%d,trigger_ch%d/pave_%d,trigger_ch%d/pave_%d,Parameters,trigger_ch%d/bl_spectr_%dtrigger_ch%d/signalwf_%d+trigger_ch%d/TBox,trigger_ch%d/signalwf_%d+trigger_ch%d/TBox]",chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[1],chtr[1],chtr[0],chtr[0],chtr[0],chtr[1],chtr[1],chtr[1]);
@@ -65,36 +65,11 @@ Server::Server()
 
 Server::~Server()
 {
-    std::cout << "Deleting Server!" << std::endl;
     delete serv;
+    std::cout << "Deleting Server!" << std::endl;
 }
 
-void ChangeParameterOne(int arg1, const char *ch)
-{
-    GlobalWrapper<RunManager>::GetInstance().Getter()->SetParameter(arg1, ch);
-}
 
-void ChangeParameterTwo(int arg1, int arg2, const char *ch)
-{
-    GlobalWrapper<RunManager>::GetInstance().Getter()->SetVecParameter(arg1, arg2, ch);
-}
-
-void ChangeParameterChar(const char *arg1, const char *ch)
-{
-    GlobalWrapper<RunManager>::GetInstance().Getter()->SetCharParameters(arg1, ch);
-}
-
-void cmdStart()
-{
-    GlobalWrapper<RunManager>::GetInstance().Getter()->StartRun();
-    std::cout << "cmdStart()" << std::endl;
-}
-
-void cmdStop()
-{
-    GlobalWrapper<RunManager>::GetInstance().Getter()->StopRun();
-    std::cout << "cmdStop()" << std::endl;
-}
 
 // void cmdUpdate()
 // {

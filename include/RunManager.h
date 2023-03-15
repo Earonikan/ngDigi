@@ -6,12 +6,11 @@
 #include "Digitizer.h"
 #include "DataFrames.h"
 #include "AnalyzeManager.h"
+#include "utils.h"
 
-// class Config;
-class Digitizer;
-class Server; 
+// class Digitizer;
+// class Server;
 
-// template <typename T>
 class RunManager
 {
 public:
@@ -44,14 +43,14 @@ public:
     void GetRconfig(Rconfig rconfig) {rconfig_ = rconfig;}
     void GetDigiData(DigiData digidata) {digidata_ = digidata;}
 
-    Digitizer *GetDigitizer() {return digitizer;}
-    Server *GetServer() {return server;}
+    // Digitizer *GetDigitizer() {return digitizer;}
+    // Server *GetServer() {return server;}
     
 private:
     
-    Server *server;
-    Digitizer *digitizer;
-    AnalyzeManager *analyzemanager;
+    Server server;
+    Digitizer digitizer;
+    AnalyzeManager analyzemanager;
 
     RunParameters runparameters_;
     HistoCollection histocollection_;

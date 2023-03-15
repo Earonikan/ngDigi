@@ -17,6 +17,6 @@ public:
     void Setter(T *obj) {obj_ = obj;}
 private:
     GlobalWrapper() {}
-    ~GlobalWrapper() {delete obj_;}
+    ~GlobalWrapper() {}
     T *obj_;
 };

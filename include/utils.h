@@ -6,3 +6,10 @@
 
 long GetCurrentTime();
 void myHandler(int dummy);
+
+void cmdStart();
+void cmdStop();
+    // friend void cmdUpdate();
+void ChangeParameterOne(int arg1, const char *ch);
+void ChangeParameterTwo(int arg1, int arg2, const char *ch);
+    

@@ -35,16 +35,17 @@ RunManager::RunManager(std::string cfgfilename)
 
 RunManager::~RunManager()
 {
-    delete digitizer;
-    delete analyzemanager;
-    delete server;
+    // delete digitizer;
+    // delete server;
+    // delete analyzemanager;
+
+    std::cout << "Killing RunManager" << std::endl;
 }
 
 void RunManager::Configure()
 {
-    server = new Server();
-    digitizer = new Digitizer(CAEN_DGTZ_USB,0,0,0);
-    analyzemanager = new AnalyzeManager();
+    // server = Server();
+    // analyzemanager = AnalyzeManager();
 
     runparameters_.nevent = 0;
     runparameters_.Nbytes = 0;
@@ -57,15 +58,16 @@ void RunManager::Configure()
 
 void RunManager::Run()
 {
+    digitizer.Open(CAEN_DGTZ_USB,0,0,0);
     while (runparameters_.run_status)
     {
         gSystem->ProcessEvents();
 
         if (runparameters_.NeedToUpdate == 1)
         {
-            digitizer->Program(dconfig_);
-            analyzemanager->CreateHistos(aconfig_, dconfig_, digitizer->GetBoardInfo());
-            server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager->GetHistoCollection());
+            digitizer.Program(dconfig_);
+            analyzemanager.CreateHistos(aconfig_, dconfig_, digitizer.GetBoardInfo());
+            server.UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager.GetHistoCollection());
             runparameters_.NeedToUpdate = 0;
         }
 
@@ -77,11 +79,11 @@ void RunManager::Run()
         while (runparameters_.run_status > 1)
         {
             // digitizer->SetRunParameters(runparameters_, dconfig_);
-            digidata_ = digitizer->ReadEvent();
+            digidata_ = digitizer.ReadEvent();
             runparameters_.nevent += digidata_.NEvents;
             PrintRateInfo();
             // analyzemanager->AnalyzeData(digidata_);
-            server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager->GetHistoCollection());
+            server.UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager.GetHistoCollection());
 
             if ((rconfig_.Nevents != 0) && (runparameters_.nevent > rconfig_.Nevents)) 
             {
@@ -98,7 +100,7 @@ void RunManager::Run()
         }
         runparameters_.nevent = 0;
     }
-    analyzemanager->DeleteHistos();
+    // analyzemanager->DeleteHistos();
 }
 
 void RunManager::SetParameter(int arg1, const char *ch)
@@ -203,9 +205,9 @@ void RunManager::StartRun()
     // SetParameter(0, "create_fit");
 
     // resethistos(); //HISTOS
-    digitizer->AllocateEvents();
+    digitizer.AllocateEvents();
     sleep(2);
-    digitizer->StartAquisition();
+    digitizer.StartAquisition();
 
     
     // if (readtemp!=0)
@@ -231,7 +233,7 @@ void RunManager::StopRun()
 
     // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 
-    digitizer->StopAquisition();
+    digitizer.StopAquisition();
         // serv->SetItemField("/Status", "value", "Stop");
     // serv->SetItemField("/Status", "_status", "0");
     // if (readtemp!=0)

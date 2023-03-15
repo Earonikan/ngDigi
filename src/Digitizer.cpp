@@ -1,8 +1,8 @@
 #include "Digitizer.h"
 
-Digitizer::Digitizer(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNode, uint32_t VMEBaseAddress)
+void Digitizer::Open(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNode, uint32_t VMEBaseAddress)
 {
-    // Execute(CAEN_DGTZ_Success;
+    // std::cout << "HERE!!!!" << std::endl;
     Execute(CAEN_DGTZ_OpenDigitizer(LinkType, LinkNum, ConetNode, VMEBaseAddress, &handle));
     Execute(CAEN_DGTZ_GetInfo(handle, &BoardInfo));
     for (uint32_t i = 0 ; i < BoardInfo.Channels; i++) ChannelTriggerMode.push_back(CAEN_DGTZ_TRGMODE_DISABLED);

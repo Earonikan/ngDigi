@@ -7,33 +7,46 @@ AnalyzeManager::AnalyzeManager()
 
 void AnalyzeManager::CreateHistos(Aconfig aconfig, Dconfig dconfig, CAEN_DGTZ_BoardInfo_t BoardInfo)
 {
+	DeleteHistos();
+
 	aconfig_ = aconfig;
 	dconfig_ = dconfig;
 	BoardInfo_ = BoardInfo;
+
+	signal_t signal;
+	trigger_t trigger;
 
 	char sname[200], stitle[200];
 	for (auto i = 0; i < int(dconfig_.chtype_db.size()); i++)
 	{
 		if (dconfig_.chtype_db[i] == 1) 
 		{	
-			histocollection_.signal_ch.push_back(i);
-			sprintf(sname, "signalwf_%d", i);
-			sprintf(stitle, "signal_waveform_trigger_ch%d", i);
-			if (histocollection_.Wfm_signal_1[i]) histocollection_.Wfm_signal_1[i]->Delete();
-			histocollection_.Wfm_signal_1[i] = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
-			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) histocollection_.Wfm_signal_1[i]->GetXaxis()->SetTitle("t, 4ns");
-			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) histocollection_.Wfm_signal_1[i]->GetXaxis()->SetTitle("t, 2ns");
+			signal.ch_num = i;
+			sprintf(sname, "signal1wf_%d", i);
+			sprintf(stitle, "signal1_waveform_ch%d", i);
+			signal.hWaveform_1 = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
+			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) signal.hWaveform_1->GetXaxis()->SetTitle("t, 4ns");
+			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) signal.hWaveform_1->GetXaxis()->SetTitle("t, 2ns");
+		
+			sprintf(sname, "signal2wf_%d", i);
+			sprintf(stitle, "signal2_waveform_ch%d", i);
+			signal.hWaveform_2 = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
+			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) signal.hWaveform_2->GetXaxis()->SetTitle("t, 4ns");
+			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) signal.hWaveform_2->GetXaxis()->SetTitle("t, 2ns");
+		
+			histocollection_.signal_ch.push_back(signal);
 		}
 
 		if (dconfig_.chtype_db[i] == 2) 
 		{
-			histocollection_.trigger_ch.push_back(i);
+			trigger.ch_num = i;
 			sprintf(sname, "trigwf_%d", i);
 			sprintf(stitle, "trigger_waveform_ch%d", i);
-			if (histocollection_.Wfm_trigger[i]) histocollection_.Wfm_trigger[i]->Delete();
-			histocollection_.Wfm_trigger[i] = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
-			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) histocollection_.Wfm_trigger[i]->GetXaxis()->SetTitle("t, 4ns");
-			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) histocollection_.Wfm_trigger[i]->GetXaxis()->SetTitle("t, 2ns");
+			trigger.hWaveform = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
+			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) trigger.hWaveform->GetXaxis()->SetTitle("t, 4ns");
+			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) trigger.hWaveform->GetXaxis()->SetTitle("t, 2ns");
+		
+			histocollection_.trigger_ch.push_back(trigger);
 		}
 
 		// std::cout << std::endl;
@@ -104,15 +117,32 @@ void AnalyzeManager::CreateHistos(Aconfig aconfig, Dconfig dconfig, CAEN_DGTZ_Bo
 	
 }
 
+AnalyzeManager::~AnalyzeManager()
+{
+	DeleteHistos();
+	std::cout << "Switching off AnalyzeManager..." << std::endl;
+}
+
 void AnalyzeManager::DeleteHistos()
 {
-	for (auto i = histocollection_.Wfm_trigger.cbegin(), end = histocollection_.Wfm_trigger.cend(); i != end; i++)
+	for (auto i = histocollection_.trigger_ch.cbegin(), end = histocollection_.trigger_ch.cend(); i != end; i++)
 	{
-		delete i->second;
+		if (i->hAmplitude) delete i->hAmplitude;
+		if (i->hAmplitude_bsl) delete i->hAmplitude_bsl;
+		if (i->hCharge) delete i->hCharge;
+		if (i->hCharge_bsl) delete i->hCharge_bsl;
+		if (i->hWaveform) delete i->hWaveform;
 	}
-	for (auto i = histocollection_.Wfm_signal_1.cbegin(), end = histocollection_.Wfm_signal_1.cend(); i != end; i++)
+	for (auto i = histocollection_.signal_ch.cbegin(), end = histocollection_.signal_ch.cend(); i != end; i++)
 	{
-		delete i->second;
+		if (i->hAmplitude_1) delete i->hAmplitude_1;
+		if (i->hAmplitude_1) delete i->hAmplitude_1;
+		if (i->hAmplitude_bsl) delete i->hAmplitude_bsl;
+		if (i->hCharge_1) delete i->hCharge_1;
+		if (i->hCharge_2) delete i->hCharge_2;
+		if (i->hCharge_bsl) delete i->hCharge_bsl;
+		if (i->hWaveform_1) delete i->hWaveform_1;
+		if (i->hWaveform_2) delete i->hWaveform_2;
 	}
 }
 

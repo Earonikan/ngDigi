@@ -8,6 +8,7 @@ class AnalyzeManager
 {
 public:
     AnalyzeManager();
+    ~AnalyzeManager();
     void CreateHistos(Aconfig aconfig, Dconfig dconfig, CAEN_DGTZ_BoardInfo_t BoardInfo);
     HistoCollection GetHistoCollection() {return histocollection_;}
     // void SetData(DigiData digidata_);
