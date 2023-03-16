@@ -10,6 +10,7 @@ Server::Server()
 
     gInterpreter->Declare("void cmdStart();"); 
     gInterpreter->Declare("void cmdStop();");
+    gInterpreter->Declare("void cmdUpdate();");
     gInterpreter->Declare("void ChangeParameterOne(int arg1, const char *ch);");
     gInterpreter->Declare("void ChangeParameterTwo(int arg1, int arg2, const char *ch);");
     gInterpreter->Declare("void ChangeParameterChar(const char *arg1, const char *ch);");
@@ -21,6 +22,7 @@ Server::Server()
     
     serv->RegisterCommand("/commands/Start", "cmdStart();", "button;rootsys/icons/ed_execute.png");
     serv->RegisterCommand("/commands/Stop", "cmdStop();", "button;rootsys/icons/ed_interrupt.png");
+    serv->RegisterCommand("/commands/Update", "cmdUpdate();", "button;rootsys/icons/rotate.png");
     serv->RegisterCommand("/commands/ReadTemperatures", "ChangeParameterOne(%arg1%,\"read_temps\");", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/CreateFitAfterRun", "ChangeParameterOne(%arg1%,\"create_fit\");", "rootsys/icons/right_arrow_cursor.png");
     serv->RegisterCommand("/commands/RunTime", "ChangeParameterOne(%arg1%,\"run_time\");", "rootsys/icons/right_arrow_cursor.png");
@@ -68,14 +70,6 @@ Server::~Server()
     delete serv;
     std::cout << "Deleting Server!" << std::endl;
 }
-
-
-
-// void cmdUpdate()
-// {
-//     GlobalWrapper<RunManager>::GetInstance().Getter()->StopRun();
-//     std::cout << "cmdUpdate" << std::endl;
-// }
 
 void Server::UpdateParametersField(RunParameters runparameters, Dconfig dconfig, Aconfig aconfig, Rconfig rconfig, DigiData digidata,  HistoCollection histocollection)
 {

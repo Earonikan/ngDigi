@@ -53,28 +53,26 @@ void RunManager::Configure()
     // runparameters_.handle = digitizer->GetHandle();
     runparameters_.run_status = 1;
     runparameters_.PrevRateTime = GetCurrentTime();
-    runparameters_.NeedToUpdate = 1;
+    // runparameters_.NeedToUpdate = 1;
+    digitizer.Open(CAEN_DGTZ_USB,0,0,0);
+    digitizer.Program(dconfig_);
+    analyzemanager.CreateHistos(aconfig_, dconfig_, digitizer.GetBoardInfo());
+    server.UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager.GetHistoCollection());
+    runparameters_.NeedToUpdate = 0;
 }
 
 void RunManager::Run()
 {
-    digitizer.Open(CAEN_DGTZ_USB,0,0,0);
     while (runparameters_.run_status)
     {
         gSystem->ProcessEvents();
-
+        server.UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager.GetHistoCollection());
         if (runparameters_.NeedToUpdate == 1)
         {
             digitizer.Program(dconfig_);
             analyzemanager.CreateHistos(aconfig_, dconfig_, digitizer.GetBoardInfo());
-            server.UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager.GetHistoCollection());
             runparameters_.NeedToUpdate = 0;
         }
-
-        // digitizer->SetRunParameters(runparameters_, dconfig_);
-        // analyzemanager->CreateHistos(aconfig_, dconfig_, digitizer->GetBoardInfo());
-        // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_, analyzemanager->GetHistoCollection());
-
 
         while (runparameters_.run_status > 1)
         {
@@ -114,7 +112,7 @@ void RunManager::SetParameter(int arg1, const char *ch)
     if (strcmp("read_temps", ch) == 0) rconfig_.ReadTemp = arg1;
     if (strcmp("create_fit", ch) == 0) aconfig_.CreateFit = arg1;
 
-    runparameters_.NeedToUpdate = 1;
+    // runparameters_.NeedToUpdate = 1;
 
     // if (strcmp("run_status", ch) == 0) runparameters_.run_status = arg1;
     // if (strcmp("need_to_update", ch) == 0) runparameters_.NeedToUpdate = arg1;
@@ -148,7 +146,7 @@ void RunManager::SetVecParameter(int arg1, int arg2, const char *ch)
         aconfig_.intsig_db[arg1] = arg2;
         aconfig_.intbl_db[arg1] = aconfig_.intsig_db[arg1] - aconfig_.WindowWidth;
     }
-    runparameters_.NeedToUpdate = 1;
+    // runparameters_.NeedToUpdate = 1;
     // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 }
 
@@ -159,7 +157,7 @@ void RunManager::SetCharParameters(const char *arg1, const char *ch)
         dconfig_.chtype_db.clear();
         ReadParameters2Vect(arg1, dconfig_.chtype_db);
     }
-    runparameters_.NeedToUpdate = 1;
+    // runparameters_.NeedToUpdate = 1;
     // server->UpdateParametersField(runparameters_, dconfig_, aconfig_, rconfig_, digidata_);
 }
 
@@ -194,7 +192,7 @@ void RunManager::StartRun()
     // SetParameter(0, "nevts");
 
     runparameters_.run_status = 2;
-    runparameters_.NeedToUpdate = 1;
+    // runparameters_.NeedToUpdate = 1;
     rconfig_.StartTime = GetCurrentTime();
     runparameters_.PrevRateTime = rconfig_.StartTime;
     runparameters_.Nbytes = 0;
@@ -226,7 +224,7 @@ void RunManager::StopRun()
     // SetParameter(0, "nevts");
 
     runparameters_.run_status = 1;
-    runparameters_.NeedToUpdate = 0;
+    // runparameters_.NeedToUpdate = 1;
     runparameters_.Nbytes = 0;
     runparameters_.Nevs = 0;
     runparameters_.nevent = 0;
@@ -241,6 +239,11 @@ void RunManager::StopRun()
     //     wget(temp1, "http://minitrs01.cern.ch", "/", 80);
     //     serv->SetItemField("/Temperatures", "value", temp0+"\n"+temp1);
     // }
+}
+
+void RunManager::Update()
+{
+    runparameters_.NeedToUpdate = 1;
 }
 
 // template <typename T>
@@ -271,4 +274,11 @@ void RunManager::PrintRateInfo()
         runparameters_.Nevs = 0;
         runparameters_.PrevRateTime = CurrentTime;
     }
+}
+
+void RunManager::Off()
+{
+    // analyzemanager.~AnalyzeManager();
+    // digitizer.~Digitizer();
+    // server.~Server();
 }

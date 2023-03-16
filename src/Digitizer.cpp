@@ -6,7 +6,7 @@ void Digitizer::Open(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNo
     Execute(CAEN_DGTZ_OpenDigitizer(LinkType, LinkNum, ConetNode, VMEBaseAddress, &handle));
     Execute(CAEN_DGTZ_GetInfo(handle, &BoardInfo));
     for (uint32_t i = 0 ; i < BoardInfo.Channels; i++) ChannelTriggerMode.push_back(CAEN_DGTZ_TRGMODE_DISABLED);
-    NTrigChannels = ChannelTriggerMode.size();
+    // NTrigChannels = ChannelTriggerMode.size();
 
     std::cout << "Connected to CAEN Digitizer Model " << BoardInfo.ModelName << std::endl;
     std::cout << "ROC FPGA Release is " << BoardInfo.ROC_FirmwareRel << std::endl;
@@ -23,6 +23,8 @@ void Digitizer::Open(CAEN_DGTZ_ConnectionType LinkType, int LinkNum, int ConetNo
 
 void Digitizer::Program(Dconfig dconfig)
 {
+    NTrigChannels = 0;
+    EnabledMask = 0;
     Execute(CAEN_DGTZ_Reset(handle));
     Execute(CAEN_DGTZ_SetRecordLength(handle, dconfig.Samples));
     Execute(CAEN_DGTZ_SetPostTriggerSize(handle, dconfig.PostTrigger));
@@ -62,6 +64,7 @@ void Digitizer::Program(Dconfig dconfig)
                     Execute(CAEN_DGTZ_SetTriggerPolarity(handle, i, CAEN_DGTZ_TriggerOnFallingEdge));
                     Execute(CAEN_DGTZ_SetChannelPulsePolarity(handle, i, CAEN_DGTZ_PulsePolarityNegative));
                 }
+                NTrigChannels++;
                 break;
         }
     }
@@ -114,7 +117,8 @@ void Digitizer::AndTriggger(Dconfig dconfig)
     }
     
     std::bitset<8> coincidenceBitset(coincidenceEnableMask);
-    uint32_t MajLvl = coincidenceBitset.count() - 1 - dconfig.MajorityLevel*((dconfig.MajorityLevel + 1) < NTrigChannels);
+    // std::cout << "Coincidence Bitset count = " << coincidenceBitset.count() << "  DMajorityLevel = " << dconfig.MajorityLevel <<"  NTrigChannels = "<< NTrigChannels << std::endl;
+    uint32_t MajLvl = coincidenceBitset.count() - 1 - dconfig.MajorityLevel*((dconfig.MajorityLevel + 1) <= NTrigChannels);
     std::cout << "Coincidence Enable Mask = " << coincidenceEnableMask << "  MajorityLevel = " << MajLvl <<"  Coincidence Window = "<< dconfig.CoincidenceWindow << std::endl;
 
     uint32_t message = coincidenceEnableMask + (MajLvl << 24) + (dconfig.CoincidenceWindow << 20);

@@ -2,7 +2,7 @@
 
 #include "stdafx.h"
 #include "DataFrames.h"
-#include "CAENDigitizerEmu.h"
+#include "CAENDigitizer.h"
 
 class AnalyzeManager
 {

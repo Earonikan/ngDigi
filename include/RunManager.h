@@ -22,6 +22,9 @@ public:
     void StartRun();
     void StopRun();
 
+    void Off();
+    void Update();
+
     void SetStatus(int status) {runparameters_.run_status = status;}
     int GetStatus() {return runparameters_.run_status;}
 

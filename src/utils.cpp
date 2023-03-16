@@ -40,3 +40,9 @@ void cmdStop()
     GlobalWrapper<RunManager>::GetInstance().Getter()->StopRun();
     std::cout << "cmdStop()" << std::endl;
 }
+
+void cmdUpdate()
+{
+    GlobalWrapper<RunManager>::GetInstance().Getter()->Update();
+    std::cout << "cmdUpdate" << std::endl;
+}

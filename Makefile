@@ -15,6 +15,7 @@ ROOTFLAGS = $(shell root-config --cflags)
 ROOTLIBS =  $(shell root-config --libs)
 ROOTLIBS += -lRHTTP
 ROOTLIBS += -lSpectrum
+ROOTLIBS += -lCAENDigitizer
 # DEPLIBS	=  -lCAENDigitizer
 
 

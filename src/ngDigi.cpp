@@ -16,6 +16,7 @@ int main(int argc, char *argv[])
 
     runmanager.Configure();
     runmanager.Run();
+    // runmanager.Off();
 
     // runmanager.ReadAllConfigsFromFile("dconfnew.cfg");
 

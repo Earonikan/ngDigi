@@ -24,12 +24,14 @@ void AnalyzeManager::CreateHistos(Aconfig aconfig, Dconfig dconfig, CAEN_DGTZ_Bo
 			signal.ch_num = i;
 			sprintf(sname, "signal1wf_%d", i);
 			sprintf(stitle, "signal1_waveform_ch%d", i);
+			// if (signal.hWaveform_1) delete signal.hWaveform_1;
 			signal.hWaveform_1 = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
 			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) signal.hWaveform_1->GetXaxis()->SetTitle("t, 4ns");
 			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) signal.hWaveform_1->GetXaxis()->SetTitle("t, 2ns");
 		
 			sprintf(sname, "signal2wf_%d", i);
 			sprintf(stitle, "signal2_waveform_ch%d", i);
+			// if (signal.hWaveform_2) delete signal.hWaveform_2;
 			signal.hWaveform_2 = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
 			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) signal.hWaveform_2->GetXaxis()->SetTitle("t, 4ns");
 			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) signal.hWaveform_2->GetXaxis()->SetTitle("t, 2ns");
@@ -42,6 +44,7 @@ void AnalyzeManager::CreateHistos(Aconfig aconfig, Dconfig dconfig, CAEN_DGTZ_Bo
 			trigger.ch_num = i;
 			sprintf(sname, "trigwf_%d", i);
 			sprintf(stitle, "trigger_waveform_ch%d", i);
+			// if (trigger.hWaveform) delete trigger.hWaveform;
 			trigger.hWaveform = new TH1F(sname, stitle, dconfig_.Samples, 0, dconfig_.Samples);
 			if (strcmp("DT5720", BoardInfo_.ModelName) == 0) trigger.hWaveform->GetXaxis()->SetTitle("t, 4ns");
 			if (strcmp("DT5730", BoardInfo_.ModelName) == 0) trigger.hWaveform->GetXaxis()->SetTitle("t, 2ns");
@@ -133,6 +136,7 @@ void AnalyzeManager::DeleteHistos()
 		if (i->hCharge_bsl) delete i->hCharge_bsl;
 		if (i->hWaveform) delete i->hWaveform;
 	}
+	histocollection_.trigger_ch.clear();
 	for (auto i = histocollection_.signal_ch.cbegin(), end = histocollection_.signal_ch.cend(); i != end; i++)
 	{
 		if (i->hAmplitude_1) delete i->hAmplitude_1;
@@ -144,6 +148,7 @@ void AnalyzeManager::DeleteHistos()
 		if (i->hWaveform_1) delete i->hWaveform_1;
 		if (i->hWaveform_2) delete i->hWaveform_2;
 	}
+	histocollection_.signal_ch.clear();
 }
 
 void AnalyzeManager::AnalyzeData()
