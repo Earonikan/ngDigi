@@ -67,13 +67,13 @@
     },
     "makefile.launchConfigurations": [
         {
-            "cwd": "/home/earon/CODE/ngDIGI/",
-            "binaryPath": "/home/earon/CODE/ngDIGI/ngDigi",
+            "cwd": "/home/earon/CODE/ngDigi/",
+            "binaryPath": "/home/earon/CODE/ngDigi/ngDigi",
             "binaryArgs": []
         },
         {
-            "cwd": "/home/earon/CODE/ngDIGI",
-            "binaryPath": "/home/earon/CODE/ngDIGI/ngDigi",
+            "cwd": "/home/earon/CODE/ngDigi",
+            "binaryPath": "/home/earon/CODE/ngDigi/ngDigi",
             "binaryArgs": []
         }
     ]
