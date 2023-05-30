@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "CAENDigitizerEmu.h"
 
 struct Dconfig
 {

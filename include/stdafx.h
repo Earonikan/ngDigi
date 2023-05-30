@@ -14,7 +14,8 @@
 #include <vector>
 #include <map>
 #include <bitset>
-#include <typeinfo> 
+#include <typeinfo>
+#include "CAENDigitizerEmu.h"
 
 // Root headers
 #ifndef MIDASSYS

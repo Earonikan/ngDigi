@@ -1,7 +1,6 @@
 #pragma once
 
 #include "stdafx.h"
-#include "CAENDigitizer.h"
 #include "DataFrames.h"
 
 class Digitizer

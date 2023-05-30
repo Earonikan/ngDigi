@@ -2,7 +2,6 @@
 
 #include "stdafx.h"
 #include "DataFrames.h"
-#include "CAENDigitizer.h"
 
 class AnalyzeManager
 {
