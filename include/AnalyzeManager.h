@@ -1,6 +1,7 @@
 #pragma once
 
 #include "stdafx.h"
+
 #include "DataFrames.h"
 
 class AnalyzeManager
